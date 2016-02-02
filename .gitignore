@@ -12,7 +12,5 @@ hs_err_pid*
 
 out/*
 .idea/*
-SootTest.iml
-soottest.xml
-module_soottest.xml
-soottest.properties
+sootOutput/*
+test_program/*

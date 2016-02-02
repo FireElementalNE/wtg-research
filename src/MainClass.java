@@ -1,5 +1,4 @@
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import soot.Body;
 import soot.BodyTransformer;
@@ -28,53 +27,58 @@ public class MainClass {
         Options.v().set_src_prec(Options.src_prec_apk);
 
         //output as APK, too//-f J
-        Options.v().set_output_format(Options.output_format_dex);
+        Options.v().set_output_format(Options.output_format_jimple);
 
         // resolve the PrintStream and System soot-classes
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
 
-        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
+        // Exclude packages
+        String[] excludes = new String[] {
+                "android.annotation",
+                "android.hardware",
+                "android.support",
+                "android.media",
+                "com.android",
+                "android.bluetooth",
+                "android.media",
+                "com.google",
+                "com.yume.android",
+                "com.squareup.okhttp",
+                "com.crashlytics",
+//            "com.nbpcorp.mobilead", // ad
+//            "com.inmobi.androidsdk", //ad
+//            "com.millennialmedia", //ad
+//            "com.admob",  //ad
+//            "com.admarvel.android.ads",  // ad
+//            "com.mopub.mobileads",  //ad
+//            "com.medialets", // ad
+                "com.slidingmenu",
+                "com.amazon.inapp.purchasing",
+                "com.loopj",
+                "com.appbrain",
+                "com.heyzap.sdk",
+                "net.daum.adam.publisher",
+                "twitter4j.",
+                "org.java_websocket",
+                "org.acra",
+                "org.apache"
+        };
+        List<String> exclude = new ArrayList<String>(Arrays.asList(excludes));
+        Options.v().set_exclude(exclude);
 
+        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
             @Override
             protected void internalTransform(final Body b, String phaseName, @SuppressWarnings("rawtypes") Map options) {
-                final PatchingChain units = b.getUnits();
-                //important to use snapshotIterator here
-                for(Iterator iter = units.snapshotIterator(); iter.hasNext();) {
-                    final Unit u = (Unit) iter.next();
-                    u.apply(new AbstractStmtSwitch() {
-
-                        public void caseInvokeStmt(InvokeStmt stmt) {
-                            InvokeExpr invokeExpr = stmt.getInvokeExpr();
-                            if(invokeExpr.getMethod().getName().equals("onDraw")) {
-
-                                Local tmpRef = addTmpRef(b);
-                                Local tmpString = addTmpString(b);
-
-                                // insert "tmpRef = java.lang.System.out;"
-                                units.insertBefore(Jimple.v().newAssignStmt(
-                                        tmpRef, Jimple.v().newStaticFieldRef(
-                                                Scene.v().getField("").makeRef())), u);
-
-                                // insert "tmpLong = 'HELLO';"
-                                units.insertBefore(Jimple.v().newAssignStmt(tmpString,
-                                        StringConstant.v("HELLO")), u);
-
-                                // insert "tmpRef.println(tmpString);"
-                                SootMethod toCall = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
-                                units.insertBefore(Jimple.v().newInvokeStmt(
-                                        Jimple.v().newVirtualInvokeExpr(tmpRef, toCall.makeRef(), tmpString)), u);
-
-                                //check that we did not mess up the Jimple
-                                b.validate();
-                            }
-                        }
-
-                    });
+                System.out.println("LINDSEY: ".concat(phaseName));
+                List<Local> local_list = b.getParameterLocals();
+                for(int i = 0; i < local_list.size(); i++) {
+                    String outStr = String.format("\tLOCALd #%d: %s", i, local_list.get(i).getName());
+                    System.out.println(outStr);
                 }
             }
-        }));
 
+        }));
         soot.Main.main(args);
     }
 
