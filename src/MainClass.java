@@ -66,19 +66,9 @@ public class MainClass {
         };
         List<String> exclude = new ArrayList<String>(Arrays.asList(excludes));
         Options.v().set_exclude(exclude);
+        InferenceTransformer infTrans = new InferenceTransformer();
+        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
 
-        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", new BodyTransformer() {
-            @Override
-            protected void internalTransform(final Body b, String phaseName, @SuppressWarnings("rawtypes") Map options) {
-                System.out.println("LINDSEY: ".concat(phaseName));
-                List<Local> local_list = b.getParameterLocals();
-                for(int i = 0; i < local_list.size(); i++) {
-                    String outStr = String.format("\tLOCALd #%d: %s", i, local_list.get(i).getName());
-                    System.out.println(outStr);
-                }
-            }
-
-        }));
         soot.Main.main(args);
     }
 
