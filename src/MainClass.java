@@ -28,7 +28,8 @@ public class MainClass {
 
         //output as APK, too//-f J
         Options.v().set_output_format(Options.output_format_jimple);
-
+        // Options.v().set_verbose(false);
+        //Options.v().set_output_format(Options.output_format_none);
         // resolve the PrintStream and System soot-classes
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
@@ -70,6 +71,7 @@ public class MainClass {
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
 
         soot.Main.main(args);
+        infTrans.logWriter.close();
     }
 
     private static Local addTmpRef(Body body)
