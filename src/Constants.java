@@ -8,10 +8,12 @@ public class Constants {
     public final static String CONTEXT_CLASS = "android.content.Context";
     public final static String JAVA_CLASS_CLASS = "java.lang.Class";
 
-    public final static String OUTPUT_FILE = "./log.out";
-    public final static String ERROR_FILE = "./log.err";
+    public final static String INF_TRANS_OUTPUT_FILE = "inference_transformer_out.log";
+    public final static String INF_TRANS_ERROR_FILE = "inference_transformer_err.log";
+    public final static String INF_VISITOR_OUTPUT_FILE = "inference_visitor_out.log";
+    public final static String INF_VISITOR_ERROR_FILE = "inference_visitor_err.log";
 
-    public final static boolean PRINT_ST = false;
+    public final static boolean PRINT_ST = true;
     public final static boolean DEBUG = true;
 }
 

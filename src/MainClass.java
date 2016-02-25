@@ -69,9 +69,7 @@ public class MainClass {
         Options.v().set_exclude(exclude);
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
-
         soot.Main.main(args);
-        infTrans.logWriter.close();
     }
 
     private static Local addTmpRef(Body body)

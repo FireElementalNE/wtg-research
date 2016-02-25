@@ -1,4 +1,5 @@
-rm -rf sootOutput
+rm -rf sootOutput *.log
+rm -rf src/*.class
 android_jars="."
 process_dir="test_program/credgen/CredGen_Final.apk"
 mylib=`find ./classpath_includes/ -name '*.jar' | xargs | sed 's/ /:/g'`

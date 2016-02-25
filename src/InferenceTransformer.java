@@ -2,6 +2,7 @@ import soot.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -13,13 +14,13 @@ public class InferenceTransformer extends BodyTransformer {
     public InferenceTransformer() {
         this.activities = new ArrayList<>();
         try {
-            this.logWriter = new LogWriter();
+            this.logWriter = new LogWriter(Constants.INF_TRANS_OUTPUT_FILE,
+                    Constants.INF_TRANS_ERROR_FILE);
         } catch (IOException e) {
             System.err.println("InferenceTransformer: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {
                 e.printStackTrace();
             }
-            logWriter.write_stackdump(e);
         }
     }
 
@@ -30,22 +31,7 @@ public class InferenceTransformer extends BodyTransformer {
         // specialinvoke $r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r3, class "com/credgenfixed/UsernameGen");
         SootMethod method = body.getMethod();
         SootClass method_class = method.getDeclaringClass();
-        Type ret_type = method.getReturnType();
-        List <Type> types = method.getParameterTypes();
-        if(method.isConstructor()
-                && method.getParameterCount() > 0
-                && ret_type.toString().equals("void")) {
-            if(method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)) {
-                for(Type type : types) {
-                    // never passes next if statement
-                    if(type.toString().contains(Constants.JAVA_CLASS_CLASS)) {
-                        logWriter.write_out(method.getName());
-                        logWriter.write_out("\n\n");
-                        break;
-                    }
-                }
-            }
-        }
+
         // this finds all of the custom activities (activities that do not start with android.<something>
         if(method.getName().equals(Constants.ONCREATE_METHOD) && method_class.hasSuperclass()) {
             SootClass method_superclass = method_class.getSuperclass();
@@ -53,10 +39,17 @@ public class InferenceTransformer extends BodyTransformer {
                 Matcher matcher = Constants.ANDROID_SKIP.matcher(method_class.getName());
                 if(!matcher.find()) {
                     String msg = "Activity: " + method.getDeclaringClass().getName();
+                    System.out.println(msg);
                     this.logWriter.write_out(msg);
                     this.activities.add(method.getDeclaringClass().getName());
                 }
             }
+        }
+        final PatchingChain<Unit> units = body.getUnits();
+        InferenceVisitor visitor = new InferenceVisitor(this);
+        for(Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext();) {
+            final Unit u = iter.next();
+            u.apply(visitor);
         }
     }
 }
