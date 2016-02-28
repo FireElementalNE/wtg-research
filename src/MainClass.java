@@ -17,11 +17,16 @@ import soot.jimple.InvokeStmt;
 import soot.jimple.Jimple;
 import soot.jimple.StringConstant;
 import soot.options.Options;
+import soot.util.Chain;
 
 
 public class MainClass {
 
     public static void main(String[] args) {
+        // TODO: see list
+        // I need to find all cases of an intent, and link them back the their _Activity_ not just the declaring class
+        // I also have to look for the actual call to intent.startActivityForResult
+        //
 
         //prefer Android APK files// -src-prec apk
         Options.v().set_src_prec(Options.src_prec_apk);
