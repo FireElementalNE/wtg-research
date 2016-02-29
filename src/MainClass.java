@@ -39,6 +39,12 @@ public class MainClass {
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
 
+        // To remove messy shell scripting file!
+        Options.v().set_force_android_jar(".");
+        Options.v().set_src_prec(Options.src_prec_apk);
+        Options.v().set_allow_phantom_refs(true);
+        Options.v().set_ignore_resolution_errors(true);
+
         // Exclude packages
         String[] excludes = new String[] {
                 "android.annotation",
