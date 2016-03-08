@@ -1,4 +1,5 @@
 import soot.*;
+import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.util.Chain;
 
 import java.io.IOException;
@@ -8,11 +9,13 @@ import java.util.regex.Pattern;
 
 public class InferenceTransformer extends BodyTransformer {
     private Map <String, Map <Integer, String> > locals;
+    private Map <String, List<String>> connections;
     private List<String> activities;
     public LogWriter logWriter;
     public InferenceTransformer() {
         this.activities = new ArrayList<>();
         this.locals = new HashMap<>();
+        this.connections = new HashMap<>();
         try {
             this.logWriter = new LogWriter(Constants.INF_TRANS_OUTPUT_FILE,
                     Constants.INF_TRANS_ERROR_FILE);
@@ -25,6 +28,7 @@ public class InferenceTransformer extends BodyTransformer {
     }
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
+
         SootMethod method = body.getMethod();
         SootClass method_class = method.getDeclaringClass();
         // this finds all of the custom activities (activities that do not start with android.<something>)
@@ -58,6 +62,25 @@ public class InferenceTransformer extends BodyTransformer {
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
+        }
+        if(visitor.connections.keySet().size() > 0) {
+            for(Map.Entry<String, List<String>> entry : visitor.connections.entrySet()) {
+                if(!this.connections.keySet().contains(entry.getKey())) {
+                    this.connections.put(entry.getKey(), entry.getValue());
+                }
+                else {
+                    for(String string : visitor.connections.get(entry.getKey())) {
+                        this.connections.get(entry.getKey()).add(string);
+                    }
+                }
+            }
+        }
+    }
+    public void printConnections() {
+        for(Map.Entry<String, List<String>> entry : this.connections.entrySet()) {
+            for(String string : entry.getValue()) {
+                this.logWriter.write_out(entry.getKey() + " --> " + string);
+            }
         }
     }
 }

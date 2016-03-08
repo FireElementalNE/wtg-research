@@ -1,9 +1,10 @@
 import soot.*;
 import soot.jimple.*;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Sources;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +12,10 @@ import java.util.regex.Pattern;
 public class InferenceVisitor extends AbstractStmtSwitch {
     public LogWriter logWriter;
     private InferenceTransformer t;
+    public Map<String, List<String>> connections;
     public InferenceVisitor(InferenceTransformer inferenceTransformer) {
         this.t = inferenceTransformer;
+        this.connections = new HashMap<>();
         try {
             this.logWriter = new LogWriter(Constants.INF_VISITOR_OUTPUT_FILE,
                     Constants.INF_VISITOR_ERROR_FILE);
@@ -21,6 +24,19 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             if(Constants.PRINT_ST) {
                 e.printStackTrace();
             }
+        }
+    }
+    public void storePossibleCallers(SootMethod target, String callee) {
+        CallGraph cg = Scene.v().getCallGraph();
+        Iterator sources = new Sources(cg.edgesInto(target));
+        while (sources.hasNext()) {
+            SootMethod src = (SootMethod)sources.next();
+            SootClass sootClass = src.getDeclaringClass();
+            if(!this.connections.keySet().contains(sootClass.getName())) {
+                this.connections.put(sootClass.getName(), new ArrayList<String>());
+            }
+            this.connections.get(sootClass.getName()).add(callee);
+            // this.logWriter.write_out(target + " might be called by " + src);
         }
     }
     @Override
@@ -33,23 +49,14 @@ public class InferenceVisitor extends AbstractStmtSwitch {
                     && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
                     && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
                     && method_class.getName().contains("Intent")) {
-                this.logWriter.write_out("TYPE 1: " + method.getDeclaringClass());
                 ValueBox valueBox = stmt.getInvokeExprBox();
-                InvokeExpr invokeExpr = stmt.getInvokeExpr();
-                this.logWriter.write_out("\tVALUE BOCX: " + valueBox.getValue().toString());
-                this.logWriter.write_out("\t" + invokeExpr.getMethodRef().declaringClass());
-                SootMethodRef sootMethodRef = invokeExpr.getMethodRef();
-                this.logWriter.write_out("\t" + method.getSignature());
-            }
-            /*if(method.getName().equals("SetOnClickListner")) {
-                    if(!method.isConstructor()
-                            && method.getParameterCount() == 1) {
-                            && method.getParameterType(0).toString().equals(Constants.ANON_VIEW_ONCLICK_LISTNER)) {
-                    this.logWriter.write_out("TYPE 2: " + method.getDeclaringClass());
-                    ValueBox valueBox = stmt.getInvokeExprBox();
-                    this.logWriter.write_out("\tVALUE BOCX: " + valueBox.getValue().toString());
+                // this.logWriter.write_out("VALUE BOCX: " + valueBox.getValue().toString());
+                Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
+                if(matcher.find()) {
+                    this.logWriter.write_out("Found Match!");
+                    storePossibleCallers(method, matcher.group(1));
                 }
-            }*/
+            }
         }
     }
 

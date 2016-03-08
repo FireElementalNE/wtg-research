@@ -16,7 +16,8 @@ public class Constants {
 
     public final static String ANON_VIEW_ONCLICK_LISTNER = "android.view.View$OnClickListener";
 
-
+    // specialinvoke $r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r3, class "com/credgenfixed/UsernameGen")
+    public final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android.content.Context,java.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
     public final static Pattern IS_ANON = Pattern.compile("^.*\\$\\d+$");
     public final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
 

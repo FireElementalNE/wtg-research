@@ -44,6 +44,7 @@ public class MainClass {
         Options.v().set_src_prec(Options.src_prec_apk);
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_ignore_resolution_errors(true);
+        Options.v().set_whole_program(true);
 
         // Exclude packages
         String[] excludes = new String[] {
@@ -81,6 +82,7 @@ public class MainClass {
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
         soot.Main.main(args);
+        infTrans.printConnections();
     }
 
     private static Local addTmpRef(Body body)
