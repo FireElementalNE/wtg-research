@@ -4,6 +4,7 @@ DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"
 JAVA_LIBS=`find ./classpath_includes/ -name '*.jar' | xargs | sed 's/ /:/g'`
 SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
+JAVA_MEM="-Xms3G -Xmx8G"
 echo "Compiling $MAIN_CLASS"
 javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/" # --soot-class-path $mylib -process-dir $process_dir -android-jars $android_jars
 echo "Done."
@@ -27,10 +28,10 @@ if [ $VERBOSE ] ; then
 	echo "VERBOSE: ON"
 	if [ $TARGET_JAR ] ; then
     	echo "Targeting: $TARGET_JAR"
-    	java -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR
+    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR
     else
     	echo "Targeting: $DEFAULT_JAR"
-    	java -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
+    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
     fi
 else
 	echo "VERBOSE: OFF"
@@ -38,10 +39,10 @@ else
 	start=`date +%s`
 	if [ $TARGET_JAR ] ; then
     	echo "Targeting: $TARGET_JAR"
-    	java -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR &>/dev/null
+    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR &>/dev/null
     else
     	echo "Targeting: $DEFAULT_JAR"
-    	java -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR &>/dev/null
+    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR &>/dev/null
     fi
     echo "Done."
     end=`date +%s`
