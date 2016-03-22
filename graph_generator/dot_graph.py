@@ -36,9 +36,9 @@ class dot_graph:
 
 	def add_edge(self, edge):
 		if edge[0] not in self.nodes.keys():
-			print '%s: ERROR node \'%s\' does not exits. skipping.' % (gu.timestamp(), edge[0])
+			print '%s: ERROR node \'%s\' does not exist. skipping.' % (gu.timestamp(), edge[0])
 		elif edge[1] not in self.nodes.keys():
-			print '%s: ERROR node \'%s\' does not exits. skipping.' % (gu.timestamp(), edge[1])
+			print '%s: ERROR node \'%s\' does not exist. skipping.' % (gu.timestamp(), edge[1])
 		else:
 			line = '%s -> %s' % (self.nodes[edge[0]], self.nodes[edge[1]])
 			if line not in self.edges:
