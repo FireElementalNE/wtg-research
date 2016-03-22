@@ -26,15 +26,31 @@ public class InferenceTransformer extends BodyTransformer {
             }
         }
     }
+
+    private boolean check_activity(SootClass sootClass) {
+        if(!sootClass.hasSuperclass()) {
+            return false;
+        }
+        else if(sootClass.hasSuperclass()) {
+            SootClass method_superclass = sootClass.getSuperclass();
+            if(method_superclass.getName().equals(Constants.ACTIVITY_SUPERCLASS)) {
+                return true;
+            }
+            else {
+                return check_activity(method_superclass);
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-
         SootMethod method = body.getMethod();
         SootClass method_class = method.getDeclaringClass();
         // this finds all of the custom activities (activities that do not start with android.<something>)
         if(method_class.hasSuperclass() && method.isConstructor()) {
-            SootClass method_superclass = method_class.getSuperclass();
-            if(method_superclass.getName().equals(Constants.ACTIVITY_SUPERCLASS)) {
+            // SootClass method_superclass = method_class.getSuperclass();
+            if(check_activity(method_class)) {
                 Matcher matcher = Constants.ANDROID_SKIP.matcher(method_class.getName());
                 if(!matcher.find()) {
                     List <String> lst = new ArrayList<>();
@@ -43,6 +59,10 @@ public class InferenceTransformer extends BodyTransformer {
                     System.out.println(msg);
                     this.logWriter.write_out(msg);
                     this.activities.add(method_class.getName());
+                }
+                else {
+                    String msg = "Skipped: " + method_class.getName();
+                    this.logWriter.write_out(msg);
                 }
             }
         }
