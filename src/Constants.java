@@ -22,6 +22,6 @@ public class Constants {
     public final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
 
     public final static boolean PRINT_ST = true;
-    public final static boolean DEBUG = true;
+    public final static boolean DEBUG = false;
 }
 
