@@ -1,23 +1,10 @@
-import java.util.*;
-
-import soot.Body;
-import soot.BodyTransformer;
-import soot.Local;
-import soot.PackManager;
-import soot.PatchingChain;
-import soot.RefType;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Transform;
-import soot.Unit;
-import soot.jimple.AbstractStmtSwitch;
-import soot.jimple.InvokeExpr;
-import soot.jimple.InvokeStmt;
+import soot.*;
 import soot.jimple.Jimple;
-import soot.jimple.StringConstant;
 import soot.options.Options;
-import soot.util.Chain;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class MainClass {
@@ -45,6 +32,7 @@ public class MainClass {
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_ignore_resolution_errors(true);
         Options.v().set_whole_program(true);
+        // Options.v().set_verbose(true);
 
         // Exclude packages
         String[] excludes = new String[] {

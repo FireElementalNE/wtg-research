@@ -30,7 +30,7 @@ class dot_graph:
 			if name_match:
 				short_name = name_match.group(1)
 				self.nodes[class_name] = short_name
-				self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, class_name))
+				self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, short_name))
 			else: 
 				print '%s: ERROR name \'%s\' is malformed. skipping' % (gu.timestamp(), class_name)
 

@@ -1,5 +1,6 @@
 import soot.*;
 import soot.jimple.*;
+import soot.jimple.internal.InvokeExprBox;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
 
@@ -26,17 +27,21 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             }
         }
     }
-    public void storePossibleCallers(SootMethod target, String callee) {
+    public void storePossibleCallersIntent(SootMethod target, String callee) {
         CallGraph cg = Scene.v().getCallGraph();
         Iterator sources = new Sources(cg.edgesInto(target));
         while (sources.hasNext()) {
             SootMethod src = (SootMethod)sources.next();
             SootClass sootClass = src.getDeclaringClass();
-            if(!this.connections.keySet().contains(sootClass.getName())) {
-                this.connections.put(sootClass.getName(), new ArrayList<String>());
+            // TODO: make this more concrete, pretty hackish
+            if(src.getActiveBody().toString().contains(callee)) {
+                if (!this.connections.keySet().contains(sootClass.getName())) {
+                    this.logWriter.write_out(src.getName());
+                    this.connections.put(sootClass.getName(), new ArrayList<String>());
+                }
+                this.connections.get(sootClass.getName()).add(callee);
+                int i = 0;
             }
-            this.connections.get(sootClass.getName()).add(callee);
-            // this.logWriter.write_out(target + " might be called by " + src);
         }
     }
     @Override
@@ -48,29 +53,17 @@ public class InferenceVisitor extends AbstractStmtSwitch {
                     && method.getParameterCount() == 2
                     && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
                     && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
-                    && method_class.getName().contains("Intent")) {
+                    && method_class.getName().equals(Constants.INTENT_CLASS)) {
                 ValueBox valueBox = stmt.getInvokeExprBox();
-                // this.logWriter.write_out("VALUE BOCX: " + valueBox.getValue().toString());
                 Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
                 if(matcher.find()) {
-                    this.logWriter.write_out("Found Match!");
-                    storePossibleCallers(method, matcher.group(1));
+                    storePossibleCallersIntent(method, matcher.group(1));
                 }
+            }
+            else if(method.getName().contains("setOnClickListener")) {
+                // TODO: work on getting correct widget type
+                String widget_type = stmt.getInvokeExprBox().getValue().getType().toString();
             }
         }
     }
-
-    @Override
-    public void caseAssignStmt(AssignStmt stmt) {
-        /*Value left_op = stmt.getLeftOp();
-        Value right_op = stmt.getRightOp();
-        if(stmt.containsInvokeExpr()) {
-            SootMethod method = stmt.getInvokeExpr().getMethod();
-            SootClass method_class = method.getDeclaringClass();
-            this.logWriter.write_out(method.toString());
-        }*/
-    }
-
-
-
 }

@@ -15,6 +15,7 @@ public class Constants {
     public final static String INF_VISITOR_ERROR_FILE = "inference_visitor_err.log";
 
     public final static String ANON_VIEW_ONCLICK_LISTNER = "android.view.View$OnClickListener";
+    public final static String INTENT_CLASS = "android.content.Intent";
 
     // specialinvoke $r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r3, class "com/credgenfixed/UsernameGen")
     public final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android.content.Context,java.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");

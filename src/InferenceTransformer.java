@@ -1,21 +1,23 @@
 import soot.*;
-import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.util.Chain;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class InferenceTransformer extends BodyTransformer {
     private Map <String, Map <Integer, String> > locals;
     private Map <String, List<String>> connections;
+    private Map <String, String> connections2;
     private List<String> activities;
+    private boolean has_run_cg;
     public LogWriter logWriter;
     public InferenceTransformer() {
         this.activities = new ArrayList<>();
         this.locals = new HashMap<>();
         this.connections = new HashMap<>();
+        this.connections2 = new HashMap<>();
         try {
             this.logWriter = new LogWriter(Constants.INF_TRANS_OUTPUT_FILE,
                     Constants.INF_TRANS_ERROR_FILE);
