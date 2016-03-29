@@ -16,3 +16,6 @@ sootOutput/*
 test_program/*
 classpath_includes/*
 *.log
+*.dot
+*.pyc
+*.svg
