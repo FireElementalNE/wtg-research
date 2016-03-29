@@ -2,14 +2,10 @@ import argparse
 import re
 import globals.constants as gc
 import globals.utils as gu
+import checker
 from dot_graph import dot_graph
 
-def clean_line(line):
-	tmp1 = re.sub('[\d\$]', '',line)
-	tmp2 = re.sub('[\\\/]', '.', tmp1)
-	return tmp2
-
-def process_file(in_fh, verbose):
+def process_file(in_fh):
 	content = in_fh.read().split('\n')
 	activities = []
 	edges = []
@@ -20,28 +16,31 @@ def process_file(in_fh, verbose):
 		if activity_line:
 			activities.append(activity_line.group(1))
 		elif edge_line:
-			edges.append([clean_line(edge_line.group(1)), clean_line(edge_line.group(3))])
+			edges.append([gu.clean_line(edge_line.group(1)), gu.clean_line(edge_line.group(3))])
 		else:
-			print '%s: WARNING line %d malformed.' % (gu.timestamp(), count)
+			if not line.startswith('Skipped:') and len(line) > 1:
+				gu.tprint('WARNING line %d malformed. %s' %  count)
 		count += 1
 	return [activities, edges]
 
-def gen_dot_file(activities, edges, output_name):
-	dot = dot_graph('My WTG', output_name)
+def gen_dot_file(activities, edges, output_name, verbose):
+	dot = dot_graph('My WTG', output_name, verbose)
 	for activity in activities:
 		dot.add_node(activity)
 	for edge in edges:
 		dot.add_edge(edge)
 	dot.render()
 
-
 def main(input_file, output_name, verbose):
-	gu.verbose_print('Input File: %s' % input_file, verbose)
-	in_fh = open(input_file, 'r')
-	activities, edges = process_file(in_fh, verbose)
-	in_fh.close()
-	gen_dot_file(activities, edges, output_name)
-
+	if checker.check_results(input_file):
+		gu.tprint('Checker Passed!')
+		gu.tprint('Input File: %s' % input_file)
+		in_fh = open(input_file, 'r')
+		activities, edges = process_file(in_fh)
+		in_fh.close()
+		gen_dot_file(activities, edges, output_name, verbose)
+	else:
+		gu.tprint('Checker Failed.')
 
 
 if __name__ == '__main__':

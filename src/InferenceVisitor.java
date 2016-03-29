@@ -27,6 +27,22 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             }
         }
     }
+    private boolean checkEdge(String activityBody, String callee) {
+        String lines[] = activityBody.split("\\r?\\n");
+        for(int i = 0; i < lines.length; i++) {
+            String testString = lines[i].replace("\n", "").replace("\r", "");
+            Matcher invokeMatcher = Constants.TARGET_INVOKE_LINE.matcher(testString);
+            if(invokeMatcher.find()) {
+                Matcher classMatcher = Constants.TARGET_ACTIVITY.matcher(testString);
+                if(classMatcher.find()) {
+                    if(classMatcher.group(1).equals(callee)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
     public void storePossibleCallersIntent(SootMethod target, String callee) {
         CallGraph cg = Scene.v().getCallGraph();
         Iterator sources = new Sources(cg.edgesInto(target));
@@ -34,13 +50,16 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             SootMethod src = (SootMethod)sources.next();
             SootClass sootClass = src.getDeclaringClass();
             // TODO: make this more concrete, pretty hackish
-            if(src.getActiveBody().toString().contains(callee)) {
+            // TODO: fix made it a _bit_ less hackish but still pretty hackish
+            // TODO: issue remains
+            if(checkEdge(src.getActiveBody().toString(), callee)) {
                 if (!this.connections.keySet().contains(sootClass.getName())) {
                     this.logWriter.write_out(src.getName());
                     this.connections.put(sootClass.getName(), new ArrayList<String>());
                 }
-                this.connections.get(sootClass.getName()).add(callee);
-                int i = 0;
+                if(!this.connections.get(sootClass.getName()).contains(callee)) {
+                    this.connections.get(sootClass.getName()).add(callee);
+                }
             }
         }
     }
@@ -62,7 +81,10 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             }
             else if(method.getName().contains("setOnClickListener")) {
                 // TODO: work on getting correct widget type
-                String widget_type = stmt.getInvokeExprBox().getValue().getType().toString();
+                // Idea: to do this, look for all constructor calls to button ect, then store hash in hashmap
+                // then make annother hashmap for all the calls to setOnclicklistner (the objects that call it)
+                // after complete traversal is done connect the two. Will also have to some how connect that
+                // to each edge...
             }
         }
     }
