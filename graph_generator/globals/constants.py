@@ -7,7 +7,7 @@ DEFAULT_VERBOSE = False
 DEFAULT_SOOT_OUTPUT = os.path.join('..', 'sootOutput')
 
 # regex
-CLASS_NAME_REGEX = '([\w\.\\\/]+(\$\d+)?)'
+CLASS_NAME_REGEX = '([\w\.\\\/]+(\$[\d\w]+)?)'
 ACTIVITY_REGEX = '^Activity: ([\w\.]+)$'
 EDGE_REGEX = '^%s\s-->\s%s$' % (CLASS_NAME_REGEX, CLASS_NAME_REGEX)
 NAME_REGEX = '^.*\.(\w+)$'

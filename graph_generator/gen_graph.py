@@ -19,7 +19,7 @@ def process_file(in_fh):
 			edges.append([gu.clean_line(edge_line.group(1)), gu.clean_line(edge_line.group(3))])
 		else:
 			if not line.startswith('Skipped:') and len(line) > 1:
-				gu.tprint('WARNING line %d malformed. %s' %  count)
+				gu.tprint('WARNING line %d malformed. %s' % (count, line))
 		count += 1
 	return [activities, edges]
 
