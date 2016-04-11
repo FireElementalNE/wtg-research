@@ -1,3 +1,4 @@
+#!/bin/bash
 rm -rf sootOutput *.log
 rm -rf src/*.class
 DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"

@@ -17,7 +17,6 @@ public class Constants {
     public final static String ANON_VIEW_ONCLICK_LISTNER = "android.view.View$OnClickListener";
     public final static String INTENT_CLASS = "android.content.Intent";
 
-    // specialinvoke $r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r3, class "com/credgenfixed/UsernameGen")
     public final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
     public final static Pattern TARGET_INVOKE_LINE = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
     public final static Pattern IS_ANON = Pattern.compile("^.*\\$\\d+$");
@@ -25,5 +24,7 @@ public class Constants {
 
     public final static boolean PRINT_ST = true;
     public final static boolean DEBUG = false;
+    // Warning this is a lot of output
+    public final static boolean CG_VERBOSE = false;
 }
 

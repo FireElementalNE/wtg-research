@@ -32,7 +32,7 @@ public class MainClass {
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_ignore_resolution_errors(true);
         Options.v().set_whole_program(true);
-        // Options.v().set_verbose(true);
+        Options.v().set_verbose(Constants.CG_VERBOSE);
 
         // Exclude packages
         String[] excludes = new String[] {
@@ -71,6 +71,8 @@ public class MainClass {
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
         soot.Main.main(args);
         infTrans.printConnections();
+        // TODO: Need to make a couple of passes here to find out the type of call graph
+        // TODO: is being generated.
     }
 
     private static Local addTmpRef(Body body)
