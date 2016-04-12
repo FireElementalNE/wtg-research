@@ -9,10 +9,14 @@ public class Constants {
 
 
 
-    public final static String INF_TRANS_OUTPUT_FILE = "inference_transformer_out.log";
+    /*public final static String INF_TRANS_OUTPUT_FILE = "inference_transformer_out.log";
     public final static String INF_TRANS_ERROR_FILE = "inference_transformer_err.log";
     public final static String INF_VISITOR_OUTPUT_FILE = "inference_visitor_out.log";
-    public final static String INF_VISITOR_ERROR_FILE = "inference_visitor_err.log";
+    public final static String INF_VISITOR_ERROR_FILE = "inference_visitor_err.log";*/
+
+    public final static String LOG_OUT_SUFFIX = "_out.log";
+    public final static String LOG_ERR_SUFFIX = "_err.log";
+
 
     public final static String ANON_VIEW_ONCLICK_LISTNER = "android.view.View$OnClickListener";
     public final static String INTENT_CLASS = "android.content.Intent";

@@ -68,11 +68,15 @@ public class MainClass {
         List<String> exclude = new ArrayList<String>(Arrays.asList(excludes));
         Options.v().set_exclude(exclude);
         InferenceTransformer infTrans = new InferenceTransformer();
-        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter", infTrans));
-        soot.Main.main(args);
-        infTrans.printConnections();
+        InferenceTransformerCallGraph infTransCG = new InferenceTransformerCallGraph();
+        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         // TODO: Need to make a couple of passes here to find out the type of call graph
         // TODO: is being generated.
+        // First attempt at second pass:
+        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter2", infTransCG));
+        soot.Main.main(args);
+        infTrans.printConnections();
+        infTransCG.printGraph();
     }
 
     private static Local addTmpRef(Body body)

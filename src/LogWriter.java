@@ -6,9 +6,9 @@ import java.io.IOException;
 public class LogWriter {
     private File file_out;
     private File file_err;
-    public LogWriter(String out_file, String err_file) throws IOException {
-        this.file_out = new File(out_file);
-        this.file_err = new File(err_file);
+    public LogWriter(String className) throws IOException {
+        this.file_out = new File(className + Constants.LOG_OUT_SUFFIX);
+        this.file_err = new File(className + Constants.LOG_ERR_SUFFIX);
         this.file_out.createNewFile();
         this.file_err.createNewFile();
     }

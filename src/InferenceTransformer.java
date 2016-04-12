@@ -19,8 +19,9 @@ public class InferenceTransformer extends BodyTransformer {
         this.connections = new HashMap<>();
         this.connections2 = new HashMap<>();
         try {
-            this.logWriter = new LogWriter(Constants.INF_TRANS_OUTPUT_FILE,
-                    Constants.INF_TRANS_ERROR_FILE);
+            /*this.logWriter = new LogWriter(Constants.INF_TRANS_OUTPUT_FILE,
+                    Constants.INF_TRANS_ERROR_FILE);*/
+            this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
             System.err.println("InferenceTransformer: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {

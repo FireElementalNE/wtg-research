@@ -18,8 +18,9 @@ public class InferenceVisitor extends AbstractStmtSwitch {
         this.t = inferenceTransformer;
         this.connections = new HashMap<>();
         try {
-            this.logWriter = new LogWriter(Constants.INF_VISITOR_OUTPUT_FILE,
-                    Constants.INF_VISITOR_ERROR_FILE);
+            /*this.logWriter = new LogWriter(Constants.INF_VISITOR_OUTPUT_FILE,
+                    Constants.INF_VISITOR_ERROR_FILE);*/
+            this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
             System.err.println("InferenceVisitor: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {

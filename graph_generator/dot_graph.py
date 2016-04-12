@@ -6,7 +6,7 @@ import globals.constants as gc
 import globals.utils as gu
 
 class dot_graph:
-	def __init__(self, title, f_name, v):
+	def __init__(self, title, f_name, v, maxiter, epsilon):
 		self.graph_name = title
 		self.verbose = v
 		self.file_name = '%s.dot' % f_name
@@ -19,20 +19,30 @@ class dot_graph:
 		self.fh.write('\tconcentrate=true;')
 		self.fh.write('\tsplines=true;')
 		self.fh.write('\tdirected=true;')
-		self.fh.write('\tmaxiter=10000;')
-		self.fh.write('\tepsilon=0.01;')
+		self.fh.write('\tmaxiter=%d;' % maxiter)
+		self.fh.write('\tepsilon=%f;' % epsilon)
 		self.nodes = {}
 		self.edges = []
 
-	def add_node(self, class_name):
+	def add_node(self, class_name, skip):
 		if class_name not in self.nodes:
-			name_match = re.match(gc.NAME_REGEX, class_name)
-			if name_match:
-				short_name = name_match.group(1)
-				self.nodes[class_name] = short_name
-				self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, short_name))
-			else: 
-				gu.tprint('ERROR name \'%s\' is malformed. skipping' % class_name)
+			if not skip:
+				name_match = re.match(gc.NAME_REGEX, class_name)
+				if name_match:
+					short_name = name_match.group(1)
+					self.nodes[class_name] = short_name
+					self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, short_name))
+				else: 
+					gu.tprint('ERROR name \'%s\' is malformed. skipping' % class_name)
+			else:
+				name_match = re.match(gc.SKIP_NODE_ADD_REGEX, class_name)
+				if name_match:
+					print name_match.group(1)
+					short_name = name_match.group(1)
+					self.nodes[class_name] = short_name
+					self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, short_name))
+				else:
+					gu.tprint('ERROR name \'%s\' is malformed. skipping' % class_name)
 
 	def add_edge(self, edge):
 		if edge[0] not in self.nodes.keys():
