@@ -37,7 +37,6 @@ class dot_graph:
 			else:
 				name_match = re.match(gc.SKIP_NODE_ADD_REGEX, class_name)
 				if name_match:
-					print name_match.group(1)
 					short_name = name_match.group(1)
 					self.nodes[class_name] = short_name
 					self.fh.write('\t%s [label=\"%s\"];\n' % (short_name, short_name))

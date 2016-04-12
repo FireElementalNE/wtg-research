@@ -47,7 +47,7 @@ def main(input_file, output_name, verbose, skip, maxiter, epsilon):
 		nodes, edges = process_file(in_fh, skip)
 		in_fh.close()
 		gen_dot_file(nodes, edges, output_name, verbose, skip, maxiter, epsilon)
-	if checker.check_results(input_file):
+	elif checker.check_results(input_file):
 		gu.tprint('Checker Passed!')
 		gu.tprint('Input File: %s' % input_file)
 		in_fh = open(input_file, 'r')
