@@ -1,25 +1,25 @@
-import soot.*;
-import soot.jimple.*;
-import soot.jimple.internal.InvokeExprBox;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.ValueBox;
+import soot.jimple.AbstractStmtSwitch;
+import soot.jimple.InvokeStmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class InferenceVisitor extends AbstractStmtSwitch {
     public LogWriter logWriter;
-    private InferenceTransformer t;
-    public Map<String, List<String>> connections;
-    public InferenceVisitor(InferenceTransformer inferenceTransformer) {
-        this.t = inferenceTransformer;
-        this.connections = new HashMap<>();
+    public Map<String, List<String>> edges;
+    public List<String> UIElements;
+    public InferenceVisitor() {
+        this.UIElements = new ArrayList<>();
+        this.edges = new HashMap<>();
         try {
-            /*this.logWriter = new LogWriter(Constants.INF_VISITOR_OUTPUT_FILE,
-                    Constants.INF_VISITOR_ERROR_FILE);*/
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
             System.err.println("InferenceVisitor: Declaring LogWriter Failed");
@@ -44,6 +44,7 @@ public class InferenceVisitor extends AbstractStmtSwitch {
         }
         return false;
     }
+
     public void storePossibleCallersIntent(SootMethod target, String callee) {
         CallGraph cg = Scene.v().getCallGraph();
         Iterator sources = new Sources(cg.edgesInto(target));
@@ -54,12 +55,13 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             // TODO: fix made it a _bit_ less hackish but still pretty hackish
             // TODO: issue remains
             if(checkEdge(src.getActiveBody().toString(), callee)) {
-                if (!this.connections.keySet().contains(sootClass.getName())) {
-                    this.logWriter.write_out(src.getName());
-                    this.connections.put(sootClass.getName(), new ArrayList<String>());
+                if (!this.edges.keySet().contains(sootClass.getName())) {
+                    // this should be something like onClick
+                    this.logWriter.write_scratch("RAWR " + src.getName());
+                    this.edges.put(sootClass.getName(), new ArrayList<String>());
                 }
-                if(!this.connections.get(sootClass.getName()).contains(callee)) {
-                    this.connections.get(sootClass.getName()).add(callee);
+                if(!this.edges.get(sootClass.getName()).contains(callee)) {
+                    this.edges.get(sootClass.getName()).add(callee);
                 }
             }
         }
@@ -80,7 +82,10 @@ public class InferenceVisitor extends AbstractStmtSwitch {
                     storePossibleCallersIntent(method, matcher.group(1));
                 }
             }
-            else if(method.getName().contains("setOnClickListener")) {
+            else if(method.getName().contains(Constants.ONCLICK_LISTNER)) {
+                ValueBox valueBox = stmt.getInvokeExprBox();
+                SootClass UIElement = stmt.getInvokeExpr().getMethodRef().declaringClass();
+                this.UIElements.add(UIElement + "::" + Integer.toString(UIElement.hashCode()));
                 // TODO: work on getting correct widget type
                 // Idea: to do this, look for all constructor calls to button ect, then store hash in hashmap
                 // then make annother hashmap for all the calls to setOnclicklistner (the objects that call it)

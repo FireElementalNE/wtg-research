@@ -13,15 +13,13 @@ public class MainClass {
         // TODO: see list
         // I need to find all cases of an intent, and link them back the their _Activity_ not just the declaring class
         // I also have to look for the actual call to intent.startActivityForResult
-        //
 
         //prefer Android APK files// -src-prec apk
         Options.v().set_src_prec(Options.src_prec_apk);
 
         //output as APK, too//-f J
         Options.v().set_output_format(Options.output_format_jimple);
-        // Options.v().set_verbose(false);
-        //Options.v().set_output_format(Options.output_format_none);
+
         // resolve the PrintStream and System soot-classes
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
@@ -73,10 +71,11 @@ public class MainClass {
         // TODO: Need to make a couple of passes here to find out the type of call graph
         // TODO: is being generated.
         // First attempt at second pass:
-        PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter2", infTransCG));
+        // PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter2", infTransCG));
         soot.Main.main(args);
-        infTrans.printConnections();
-        infTransCG.printGraph();
+        infTrans.printAll();
+
+        // infTransCG.printGraph();
     }
 
     private static Local addTmpRef(Body body)

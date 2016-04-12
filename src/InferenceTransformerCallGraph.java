@@ -12,6 +12,7 @@ public class InferenceTransformerCallGraph extends BodyTransformer {
     private LogWriter logWriter;
     private List<String> nodes;
     private List<String> edges;
+    private List<String> UIElements;
     public InferenceTransformerCallGraph() {
         this.edges = new ArrayList<>();
         this.nodes = new ArrayList<>();
@@ -48,13 +49,6 @@ public class InferenceTransformerCallGraph extends BodyTransformer {
                 this.edges.add(edge);
             }
         }
-        /*this.logWriter.write_out("Calling visitor on " + body.getMethod().getName());
-        final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitorCallGraph visitor = new InferenceVisitorCallGraph();
-        for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
-            final Unit u = iter.next();
-            u.apply(visitor);
-        }*/
     }
     public void printGraph() {
         for(String s : this.nodes) {
