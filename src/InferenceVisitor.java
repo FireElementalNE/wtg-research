@@ -16,6 +16,10 @@ public class InferenceVisitor extends AbstractStmtSwitch {
     public LogWriter logWriter;
     public Map<String, List<String>> edges;
     public List<String> UIElements;
+
+    /**
+     * Constructor
+     */
     public InferenceVisitor() {
         this.UIElements = new ArrayList<>();
         this.edges = new HashMap<>();
@@ -28,7 +32,14 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             }
         }
     }
-    private boolean checkEdge(String activityBody, String callee) {
+
+    /**
+     * Checks that the current active body has an exact invoke line to the target Activity
+     * @param activityBody the current active body
+     * @param callee the class that is being called through an intent
+     * @return true iff the callee is being invoked
+     */
+    private boolean checkIntentCallEdge(String activityBody, String callee) {
         String lines[] = activityBody.split("\\r?\\n");
         for(int i = 0; i < lines.length; i++) {
             String testString = lines[i].replace("\n", "").replace("\r", "");
@@ -45,52 +56,50 @@ public class InferenceVisitor extends AbstractStmtSwitch {
         return false;
     }
 
-    public void storePossibleCallersIntent(SootMethod target, String callee) {
+    /**
+     * Stores possible Intent callers, prelim to creating an edge
+     * @param target the method that has the intent call
+     * @param callee the target Activity of the intent call
+     */
+    private void storePossibleCallersIntent(SootMethod target, String callee) {
         CallGraph cg = Scene.v().getCallGraph();
         Iterator sources = new Sources(cg.edgesInto(target));
         while (sources.hasNext()) {
             SootMethod src = (SootMethod)sources.next();
-            SootClass sootClass = src.getDeclaringClass();
+            SootClass srcClass = src.getDeclaringClass();
             // TODO: make this more concrete, pretty hackish
             // TODO: fix made it a _bit_ less hackish but still pretty hackish
             // TODO: issue remains
-            if(checkEdge(src.getActiveBody().toString(), callee)) {
-                if (!this.edges.keySet().contains(sootClass.getName())) {
-                    // this should be something like onClick
-                    this.logWriter.write_scratch("RAWR " + src.getName());
-                    this.edges.put(sootClass.getName(), new ArrayList<String>());
+            if(checkIntentCallEdge(src.getActiveBody().toString(), callee)) {
+                if (!this.edges.keySet().contains(srcClass.getName())) {
+                    this.edges.put(srcClass.getName(), new ArrayList<String>());
                 }
-                if(!this.edges.get(sootClass.getName()).contains(callee)) {
-                    this.edges.get(sootClass.getName()).add(callee);
+                if(!this.edges.get(srcClass.getName()).contains(callee)) {
+                    this.edges.get(srcClass.getName()).add(callee);
                 }
             }
         }
     }
+
+    /**
+     * Overidden statment to catch invoke statements
+     * @param stmt the current invoke statement
+     */
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
         if(stmt.containsInvokeExpr()) {
             SootMethod method = stmt.getInvokeExpr().getMethod();
-            SootClass method_class = method.getDeclaringClass();
+            SootClass methodClass = method.getDeclaringClass();
             if(method.isConstructor()
                     && method.getParameterCount() == 2
                     && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
                     && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
-                    && method_class.getName().equals(Constants.INTENT_CLASS)) {
+                    && methodClass.getName().equals(Constants.INTENT_CLASS)) {
                 ValueBox valueBox = stmt.getInvokeExprBox();
                 Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
                 if(matcher.find()) {
                     storePossibleCallersIntent(method, matcher.group(1));
                 }
-            }
-            else if(method.getName().contains(Constants.ONCLICK_LISTNER)) {
-                ValueBox valueBox = stmt.getInvokeExprBox();
-                SootClass UIElement = stmt.getInvokeExpr().getMethodRef().declaringClass();
-                this.UIElements.add(UIElement + "::" + Integer.toString(UIElement.hashCode()));
-                // TODO: work on getting correct widget type
-                // Idea: to do this, look for all constructor calls to button ect, then store hash in hashmap
-                // then make annother hashmap for all the calls to setOnclicklistner (the objects that call it)
-                // after complete traversal is done connect the two. Will also have to some how connect that
-                // to each edge...
             }
         }
     }

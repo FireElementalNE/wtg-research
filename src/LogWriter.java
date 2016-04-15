@@ -4,18 +4,28 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class LogWriter {
-    private File file_out;
-    private File file_err;
-    private File file_scratch;
+    private File fileOut, fileErr, fileScratch;
+
+    /**
+     * Constructor for the log writting class, this class creates and writes to logs
+     * @param className the current classname
+     * @throws IOException
+     */
     public LogWriter(String className) throws IOException {
-        this.file_out = new File(className + Constants.LOG_OUT_SUFFIX);
-        this.file_err = new File(className + Constants.LOG_ERR_SUFFIX);
-        this.file_scratch = new File(className + Constants.LOG_SCRATCH_SUFFIX);
-        this.file_out.createNewFile();
-        this.file_err.createNewFile();
-        this.file_scratch.createNewFile();
+        this.fileOut = new File(className + Constants.LOG_OUT_SUFFIX);
+        this.fileErr = new File(className + Constants.LOG_ERR_SUFFIX);
+        this.fileScratch = new File(className + Constants.LOG_SCRATCH_SUFFIX);
+        this.fileOut.createNewFile();
+        this.fileErr.createNewFile();
+        this.fileScratch.createNewFile();
     }
-    private void write_file(File file, String str) {
+
+    /**
+     * write to a log file
+     * @param file the file to write to
+     * @param str the string to write
+     */
+    private void writeFile(File file, String str) {
         synchronized (this) {
             try {
                 FileWriter fw_out = new FileWriter(file.getAbsoluteFile(), true);
@@ -37,14 +47,28 @@ public class LogWriter {
         }
     }
 
-    public void write_out(String str)  {
-        this.write_file(this.file_out, str);
+    /**
+     * write to the stdout log
+     * @param str the string to write
+     */
+    public void writeOut(String str)  {
+        this.writeFile(this.fileOut, str);
     }
-    public void write_err(String str) {
-        this.write_file(this.file_err, str);
+
+    /**
+     * write to the stderr log
+     * @param str the string to write
+     */
+    public void writeErr(String str) {
+        this.writeFile(this.fileErr, str);
     }
-    public void write_scratch(String str) {
-        this.write_file(this.file_scratch, str);
+
+    /**
+     * write to the scratch log, this is for testing purposes
+     * @param str the string to write
+     */
+    public void writeScratch(String str) {
+        this.writeFile(this.fileScratch, str);
     }
 }
 
