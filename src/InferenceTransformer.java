@@ -51,35 +51,6 @@ public class InferenceTransformer extends BodyTransformer {
     }
 
     /**
-     * TODO: Fix this method
-     * Trys to find an onclick from an onclick lisnter method
-     * @param methodClass the current class calling the current method (setOnClickListener)
-     * @param method the current method (setOnClickListener)
-     */
-    private void getOnClickMethodFromListner(SootClass methodClass, SootMethod method) {
-        // TODO: Get UI element
-        // Idea:
-        //  1. Find onclick listner get the first arg which will be of type View.OnClickListener()
-        //  2. Get the onClick method of that listner
-        //  3. ...
-        if(method.getName().equals(Constants.SET_ONCLICK_LISTNER)) {
-            try {
-                SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
-                if (onClickMethod.hasActiveBody()) {
-                    this.logWriter.writeScratch(onClickMethod.getActiveBody().toString());
-                } else {
-                    this.logWriter.writeScratch("No active body.");
-                }
-            } catch (RuntimeException rte) {
-                if (Constants.PRINT_ST) {
-                    rte.printStackTrace();
-                }
-                this.logWriter.writeErr(rte.getMessage());
-            }
-        }
-    }
-
-    /**
      * looks for activities to create nodes in the graph
      * @param methodClass the current class calling the current method
      * @param method the current method
@@ -159,6 +130,7 @@ public class InferenceTransformer extends BodyTransformer {
         // getOnClickMethodFromListner(methodClass, method);
         // send to InferenceVisitor
         sendToVisitor(body);
+
     }
 
     /**

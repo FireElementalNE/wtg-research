@@ -1,11 +1,9 @@
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.ValueBox;
+import soot.*;
 import soot.jimple.AbstractStmtSwitch;
 import soot.jimple.InvokeStmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
+import soot.util.Chain;
 
 import java.io.IOException;
 import java.util.*;
@@ -82,6 +80,44 @@ public class InferenceVisitor extends AbstractStmtSwitch {
     }
 
     /**
+     * TODO: Fix this method
+     * Trys to find an onclick from an onclick lisnter method
+     * @param methodClass the current class calling the current method (setOnClickListener)
+     * @param method the current method (setOnClickListener)
+     */
+    private void getOnClickMethodFromListner(SootClass methodClass, SootMethod method) {
+        // TODO: Get UI element
+        // Idea:
+        //  1. Find onclick listner get the first arg which will be of type View.OnClickListener()
+        //  2. Get the onClick method of that listner
+        //  3. ...
+        //  4. Profit
+        if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
+            if(method.hasActiveBody()) {
+                // try with locals?
+                try {
+                    // does no find "onClick" because at this point we have a
+                    //   parameter not a full SootClass...
+                    SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
+                    if (onClickMethod.hasActiveBody()) {
+                        this.logWriter.writeScratch(onClickMethod.getActiveBody().toString());
+                    } else {
+                        this.logWriter.writeErr("No active body.");
+                    }
+                } catch (RuntimeException rte) {
+                    if (Constants.PRINT_ST) {
+                        rte.printStackTrace();
+                    }
+                    this.logWriter.writeErr(rte.getMessage());
+                }
+            }
+            else {
+                this.logWriter.writeErr("Method has no active body.");
+            }
+        }
+    }
+
+    /**
      * Overidden statment to catch invoke statements
      * @param stmt the current invoke statement
      */
@@ -101,6 +137,7 @@ public class InferenceVisitor extends AbstractStmtSwitch {
                     storePossibleCallersIntent(method, matcher.group(1));
                 }
             }
+            getOnClickMethodFromListner(methodClass, method);
         }
     }
 }

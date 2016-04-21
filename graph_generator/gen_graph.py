@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import argparse
 import re
 import globals.constants as gc

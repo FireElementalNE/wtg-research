@@ -18,6 +18,7 @@ public class Constants {
     public final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
     public final static Pattern TARGET_INVOKE_LINE = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
     public final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
+    public final static Pattern ON_CLICK_LISTENER_CLASS = Pattern.compile("^android\\.view\\.View[\\$\\.]OnClickListener$");
 
     public final static boolean PRINT_ST = true;
     public final static boolean DEBUG = false;
