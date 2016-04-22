@@ -85,7 +85,7 @@ public class InferenceVisitor extends AbstractStmtSwitch {
      * @param methodClass the current class calling the current method (setOnClickListener)
      * @param method the current method (setOnClickListener)
      */
-    private void getOnClickMethodFromListner(SootClass methodClass, SootMethod method) {
+    private void getOnClickMethodFromListner(InvokeStmt stmt, SootClass methodClass, SootMethod method) {
         // TODO: Get UI element
         // Idea:
         //  1. Find onclick listner get the first arg which will be of type View.OnClickListener()
@@ -94,10 +94,12 @@ public class InferenceVisitor extends AbstractStmtSwitch {
         //  4. Profit
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
-                // try with locals?
+                this.logWriter.writeScratch("OnClickListner has active body.");
                 try {
                     // does no find "onClick" because at this point we have a
                     //   parameter not a full SootClass...
+                    // NOTE: I can get MainActivity as an incident edge to this method
+                    //   using the cg
                     SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
                     if (onClickMethod.hasActiveBody()) {
                         this.logWriter.writeScratch(onClickMethod.getActiveBody().toString());
@@ -137,7 +139,7 @@ public class InferenceVisitor extends AbstractStmtSwitch {
                     storePossibleCallersIntent(method, matcher.group(1));
                 }
             }
-            getOnClickMethodFromListner(methodClass, method);
+            getOnClickMethodFromListner(stmt, methodClass, method);
         }
     }
 }

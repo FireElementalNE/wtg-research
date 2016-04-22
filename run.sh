@@ -21,9 +21,15 @@ while getopts ":t:v" opt; do
 	  ;;
   esac
 done
-printf "Compiling %s..." $MAIN_CLASS
-javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/" # --soot-class-path $mylib -process-dir $process_dir -android-jars $android_jars
-printf "Done.\n"
+printf "Compiling %s\n" $MAIN_CLASS
+javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/"
+if [ $? != 0 ] ; then
+    printf "Compilation failed.\n"
+    exit $?
+else
+    printf "Compilation successful.\n"
+fi
+
 # The lolz: https://mailman.cs.mcgill.ca/pipermail/soot-list/2015-June/008074.html
 printf "Verbose..."
 if [ $VERBOSE ] ; then
@@ -32,7 +38,7 @@ if [ $VERBOSE ] ; then
     	printf "Targeting: %s\n" $TARGET_JAR
     	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR
     else
-    	printf "Targeting: %s\n"
+    	printf "Targeting: %s\n" $DEFAULT_JAR
     	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
     fi
 else
