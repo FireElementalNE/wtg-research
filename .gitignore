@@ -15,6 +15,7 @@ wtg-research.iml
 sootOutput/*
 test_program/*
 classpath_includes/*
+docs/soot/*
 *.log
 *.dot
 *.pyc
