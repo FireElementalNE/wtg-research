@@ -9,8 +9,7 @@ public class InferenceTransformer extends BodyTransformer {
     private Map <String, List<String>> edges;
     private List<String> nodes;
     private List<String> UIElements;
-    public LogWriter logWriter;
-
+    private LogWriter logWriter;
     /**
      * Constructor
      */
@@ -104,15 +103,30 @@ public class InferenceTransformer extends BodyTransformer {
      * Send the current body through the InferenceVisitor
      * @param body the current body being analyzed
      */
-    private void sendToVisitor(Body body) {
+    private void sendToVisitorFirstPass(Body body) {
         final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitor visitor = new InferenceVisitor();
+        InferenceVisitor visitor = new InferenceVisitor(1);
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
         }
         updateEdges(visitor);
         updateUIElements(visitor);
+        sendToVisitorSecondPass(body, visitor);
+    }
+
+    /**
+     * do second visit pass to find correct OnClickListner Declarations
+     * @param body the current body being analyzed
+     * @param visitor the visitor from the first pass
+     */
+    private void sendToVisitorSecondPass(Body body, InferenceVisitor visitor) {
+        final PatchingChain<Unit> units = body.getUnits();
+        InferenceVisitor visitorSecondPass = new InferenceVisitor(2, visitor.onClickListeners);
+        for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
+            final Unit u = iter.next();
+            u.apply(visitorSecondPass);
+        }
     }
 
     /**
@@ -129,8 +143,7 @@ public class InferenceTransformer extends BodyTransformer {
         // See comments on getOnClickMethodFromListner()
         // getOnClickMethodFromListner(methodClass, method);
         // send to InferenceVisitor
-        sendToVisitor(body);
-
+        sendToVisitorFirstPass(body);
     }
 
     /**

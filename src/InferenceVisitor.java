@@ -1,9 +1,11 @@
-import soot.*;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.ValueBox;
 import soot.jimple.AbstractStmtSwitch;
 import soot.jimple.InvokeStmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
-import soot.util.Chain;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,15 +16,38 @@ public class InferenceVisitor extends AbstractStmtSwitch {
     public LogWriter logWriter;
     public Map<String, List<String>> edges;
     public List<String> UIElements;
+    public List<String> onClickListeners;
+    private int passNumber;
 
     /**
-     * Constructor
+     * Constructor for first pass
+     * @param passNumber the pass number
      */
-    public InferenceVisitor() {
+    public InferenceVisitor(int passNumber) {
         this.UIElements = new ArrayList<>();
         this.edges = new HashMap<>();
+        this.onClickListeners = new ArrayList<>();
+        this.passNumber = passNumber;
         try {
-            this.logWriter = new LogWriter(this.getClass().getSimpleName());
+            this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
+        } catch (IOException e) {
+            System.err.println("InferenceVisitor: Declaring LogWriter Failed");
+            if(Constants.PRINT_ST) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Constructor for the second pass
+     * @param passNumber the pass number
+     * @param onClickListeners the list of onclicklisteners from the first pass
+     */
+    public InferenceVisitor(int passNumber, List<String> onClickListeners) {
+        this.passNumber = passNumber;
+        this.onClickListeners = onClickListeners;
+        try {
+            this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
         } catch (IOException e) {
             System.err.println("InferenceVisitor: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {
@@ -78,23 +103,25 @@ public class InferenceVisitor extends AbstractStmtSwitch {
             }
         }
     }
-
     /**
      * TODO: Fix this method
-     * Trys to find an onclick from an onclick lisnter method
-     * @param methodClass the current class calling the current method (setOnClickListener)
-     * @param method the current method (setOnClickListener)
+     * Trys to find an onclick from an onclick listener method
+     * @param stmt the current invoke stmt
      */
-    private void getOnClickMethodFromListner(InvokeStmt stmt, SootClass methodClass, SootMethod method) {
+    private void getOnClickMethodFromListner(InvokeStmt stmt) {
         // TODO: Get UI element
         // Idea:
         //  1. Find onclick listner get the first arg which will be of type View.OnClickListener()
         //  2. Get the onClick method of that listner
         //  3. ...
         //  4. Profit
+        SootMethod method = stmt.getInvokeExpr().getMethod();
+        SootClass methodClass = method.getDeclaringClass();
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
                 this.logWriter.writeScratch("OnClickListner has active body.");
+                ValueBox valueBox = stmt.getInvokeExprBox();
+                this.logWriter.writeScratch("\t" + valueBox.getValue().toString());
                 try {
                     // does no find "onClick" because at this point we have a
                     //   parameter not a full SootClass...
@@ -120,26 +147,54 @@ public class InferenceVisitor extends AbstractStmtSwitch {
     }
 
     /**
-     * Overidden statment to catch invoke statements
+     * Store onclick listeners on the _first_ pass so that they can be used
+     * on the _second_ pass
+     * @param stmt the InvokeStmt currently being analyzed
+     */
+    private void storeOnClickListenerInvokeStmt(InvokeStmt stmt) {
+        SootMethod method = stmt.getInvokeExpr().getMethod();
+        SootClass methodClass = method.getDeclaringClass();
+        if(method.isConstructor()
+                && method.getParameterCount() == 1
+                && (method.getParameterType(0).toString().contains("Main")
+                        || method.getParameterType(0).toString().contains("main"))) {
+            ValueBox valueBox = stmt.getInvokeExprBox();
+            this.logWriter.writeScratch(methodClass.getName());
+            this.logWriter.writeScratch("\t" + methodClass.getType().toString());
+            this.logWriter.writeScratch("\t" + valueBox.toString());
+        }
+    }
+
+    public void storeGraphEdges(InvokeStmt stmt) {
+        SootMethod method = stmt.getInvokeExpr().getMethod();
+        SootClass methodClass = method.getDeclaringClass();
+        if(method.isConstructor()
+                && method.getParameterCount() == 2
+                && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
+                && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
+                && methodClass.getName().equals(Constants.INTENT_CLASS)) {
+            ValueBox valueBox = stmt.getInvokeExprBox();
+            Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
+            if(matcher.find()) {
+                storePossibleCallersIntent(method, matcher.group(1));
+            }
+        }
+    }
+
+    /**
+     * Overidden statement to catch invoke statements
      * @param stmt the current invoke statement
      */
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
         if(stmt.containsInvokeExpr()) {
-            SootMethod method = stmt.getInvokeExpr().getMethod();
-            SootClass methodClass = method.getDeclaringClass();
-            if(method.isConstructor()
-                    && method.getParameterCount() == 2
-                    && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
-                    && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
-                    && methodClass.getName().equals(Constants.INTENT_CLASS)) {
-                ValueBox valueBox = stmt.getInvokeExprBox();
-                Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
-                if(matcher.find()) {
-                    storePossibleCallersIntent(method, matcher.group(1));
-                }
+            if(this.passNumber == 1) {
+                storeGraphEdges(stmt);
+                storeOnClickListenerInvokeStmt(stmt);
             }
-            getOnClickMethodFromListner(stmt, methodClass, method);
+            else {
+                getOnClickMethodFromListner(stmt);
+            }
         }
     }
 }
