@@ -2,9 +2,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 
 public class LogWriter {
     private File fileOut, fileErr, fileScratch;
+
+    /**
+     * Add a timestamp to a msg
+     * @param msg the msg
+     * @return the msg with a timestamp;
+     */
+    public static String formatMsg(String msg) {
+        Date date = new Date();
+        return String.format("[%s]: %s\n", Constants.DATE_FORMAT.format(date),msg);
+    }
 
     /**
      * Constructor for the log writting class, this class creates and writes to logs
@@ -20,6 +31,23 @@ public class LogWriter {
         this.fileScratch.createNewFile();
     }
 
+
+    /**
+     * Constructor for the log writting class, this class creates and writes to logs
+     * @param className the current classname
+     * @param passNum if InferenceVisitor puts the passnum in the name to
+     *                differentiate between passes
+     * @throws IOException
+     */
+    public LogWriter(String className, int passNum) throws IOException {
+        this.fileOut = new File(className + Integer.toString(passNum) + Constants.LOG_OUT_SUFFIX);
+        this.fileErr = new File(className + Integer.toString(passNum) + Constants.LOG_ERR_SUFFIX);
+        this.fileScratch = new File(className + Integer.toString(passNum) + Constants.LOG_SCRATCH_SUFFIX);
+        this.fileOut.createNewFile();
+        this.fileErr.createNewFile();
+        this.fileScratch.createNewFile();
+    }
+
     /**
      * write to a log file
      * @param file the file to write to
@@ -30,7 +58,7 @@ public class LogWriter {
             try {
                 FileWriter fw_out = new FileWriter(file.getAbsoluteFile(), true);
                 BufferedWriter bw_out = new BufferedWriter(fw_out);
-                bw_out.write(str + "\n");
+                bw_out.write(formatMsg(str));
                 bw_out.flush();
                 if(Constants.DEBUG) {
                     System.out.println("LogWriter: " + str);
