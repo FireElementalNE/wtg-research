@@ -1,14 +1,16 @@
 #!/bin/bash
 rm -rf sootOutput *.log
 rm -rf src/*.class
+
+# defaults
 DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"
 JAVA_LIBS=`find ./classpath_includes/ -name '*.jar' | xargs | sed 's/ /:/g'`
 SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
-JAVA_MEM="-Xmx8196m"
-# TODO: consider using &>/dev/null...
-usage() { echo "Usage: $0 [-v] [-t <android jar>]" 1>&2; exit 1; }
-while getopts ":t:v" opt; do
+DEFAULT_MEM="8196m"
+
+usage() { echo "Usage: $0 [-v] [-t <android jar>] [-m max xmx memomry]" 1>&2; exit 1; }
+while getopts ":t:vm:" opt; do
   case $opt in
     v)
       VERBOSE=1
@@ -16,46 +18,50 @@ while getopts ":t:v" opt; do
     t)
 	  TARGET_JAR="$OPTARG"
 	  ;;
+    m)
+      MAX_MEM="$OPTARG"
+      ;;
     \?)
 	  usage
 	  ;;
   esac
 done
-printf "Compiling %s\n" $MAIN_CLASS
+
+# set memory and pretty print
+if [ $MAX_MEM ] ; then
+    DEFAULT_MEM="$MAX_MEM"
+fi
+printf "Max Memory.....%s\n" $DEFAULT_MEM
+
+# set target and pretty print
+if [ $TARGET_JAR ] ; then
+    DEFAULT_JAR="$TARGET_JAR"
+fi
+printf "Targeting......%s\n" $DEFAULT_JAR
+
+# pretty print compilation and compile
 javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/"
+printf "Compilation...."
 if [ $? != 0 ] ; then
-    printf "Compilation failed.\n"
+    printf "failed\n"
     exit $?
 else
-    printf "Compilation successful.\n"
+    printf "successful\n"
 fi
 
 # The lolz: https://mailman.cs.mcgill.ca/pipermail/soot-list/2015-June/008074.html
-printf "Verbose..."
+printf "Verbose........"
 if [ $VERBOSE ] ; then
-	printf "enabled.\n"
-	if [ $TARGET_JAR ] ; then
-    	printf "Targeting: %s\n" $TARGET_JAR
-    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR
-    else
-    	printf "Targeting: %s\n" $DEFAULT_JAR
-    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
-    fi
+    printf "enabled\n"
+	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
 else
-	printf "disabled.\n"
+    printf "disabled\n"
 	start=`date +%s`
-	if [ $TARGET_JAR ] ; then
-    	printf "Targeting: %s\n" $TARGET_JAR
 	printf "Running Soot..."
-    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $TARGET_JAR &>/dev/null
-    else
-    	printf "Targeting: %s\n" $DEFAULT_JAR
-	printf "Running Soot..."
-    	java $JAVA_MEM -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR &>/dev/null
-    fi
-    printf "Done.\n"
+	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR &>/dev/null
+    printf "Done\n"
     end=`date +%s`
-    runtime=$((end-start))
-    echo "Runtime: $runtime seconds"
+    RUNTIME=$((end-start))
+    printf "Runtime........%s seconds\n" $RUNTIME
 fi
 
