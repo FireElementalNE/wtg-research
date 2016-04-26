@@ -9,7 +9,13 @@ SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
 DEFAULT_MEM="8196m"
 
-usage() { echo "Usage: $0 [-v] [-t <android jar>] [-m max xmx memomry]" 1>&2; exit 1; }
+usage() { 
+  printf "Usage: $0 [-v] [-t <ANDROID APK>] [-m <MEMORY>]\n" 1>&2 
+  printf "\t-v shows soot's (very) verbose output\n" 1>&2
+  printf "\t-t <ANDROID APK> sets the target apk\n" 1>&2
+  printf "\t-m <MEMORY> sets the max java memory (-Xmx)\n" 1>&2
+  exit 1
+}
 while getopts ":t:vm:" opt; do
   case $opt in
     v)
