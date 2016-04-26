@@ -5,8 +5,7 @@ the static analyzer [**DroidInfer**](https://github.com/proganalysis/type-infere
 
 # Running
 [**run.sh**](https://github.com/FireElementalNE/wtg-research/blob/master/run.sh) runs the framework. It assumes that all required jars are  
-in a folder named 'classpath_includes' in the root (the same directory  
-  as this file).  
+in a folder named 'classpath_includes' in the root (the same directory as this file).  
   An example classpath_includes folder is shown below:  
 ```
 |-- android-4.3.jar
