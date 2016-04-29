@@ -2,10 +2,9 @@ import soot.*;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
 
 
-public class InferenceTransformer extends BodyTransformer {
+class InferenceTransformer extends BodyTransformer {
     private Map <String, List<String>> edges;
     private List<String> nodes;
     private List<String> UIElements;
@@ -13,7 +12,7 @@ public class InferenceTransformer extends BodyTransformer {
     /**
      * Constructor
      */
-    public InferenceTransformer() {
+    InferenceTransformer() {
         this.nodes = new ArrayList<>();
         this.edges = new HashMap<>();
         this.UIElements = new ArrayList<>();
@@ -27,27 +26,6 @@ public class InferenceTransformer extends BodyTransformer {
         }
     }
 
-    /**
-     * Checks a class heirarchy to see if it is decended from android.app.Activity
-     * does this recursivly
-     * @param sootClass the current class being checked
-     * @return a boolean that is true iff the current class IS android.app.Activity
-     */
-    private boolean checkActivity(SootClass sootClass) {
-        if(!sootClass.hasSuperclass()) {
-            return false;
-        }
-        else if(sootClass.hasSuperclass()) {
-            SootClass methodSuperclass = sootClass.getSuperclass();
-            if(methodSuperclass.getName().equals(Constants.ACTIVITY_SUPERCLASS)) {
-                return true;
-            }
-            else {
-                return checkActivity(methodSuperclass);
-            }
-        }
-        return false;
-    }
 
     /**
      * looks for activities to create nodes in the graph
@@ -58,9 +36,8 @@ public class InferenceTransformer extends BodyTransformer {
         // this finds all of the custom activities (activities that do not start with android.<something>)
         if(methodClass.hasSuperclass() && method.isConstructor()) {
             // SootClass method_superclass = method_class.getSuperclass();
-            if (checkActivity(methodClass)) {
-                Matcher matcher = Constants.ANDROID_SKIP.matcher(methodClass.getName());
-                if (!matcher.find()) {
+            if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
+                if (!Utilities.androidSkip(methodClass)) {
                     this.nodes.add(methodClass.getName());
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
@@ -149,7 +126,7 @@ public class InferenceTransformer extends BodyTransformer {
     /**
      *  Print everything
      */
-    public void printAll() {
+    void printAll() {
         printNodes();
         printEdges();
         printUIElements();

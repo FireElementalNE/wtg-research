@@ -12,18 +12,18 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 
-public class InferenceVisitor extends AbstractStmtSwitch {
-    public LogWriter logWriter;
+class InferenceVisitor extends AbstractStmtSwitch {
+    private LogWriter logWriter;
     public Map<String, List<String>> edges;
-    public List<String> UIElements;
-    public List<String> onClickListeners;
+    List<String> UIElements;
+    List<String> onClickListeners;
     private int passNumber;
 
     /**
      * Constructor for first pass
      * @param passNumber the pass number
      */
-    public InferenceVisitor(int passNumber) {
+    InferenceVisitor(int passNumber) {
         this.UIElements = new ArrayList<>();
         this.edges = new HashMap<>();
         this.onClickListeners = new ArrayList<>();
@@ -43,7 +43,7 @@ public class InferenceVisitor extends AbstractStmtSwitch {
      * @param passNumber the pass number
      * @param onClickListeners the list of onclicklisteners from the first pass
      */
-    public InferenceVisitor(int passNumber, List<String> onClickListeners) {
+    InferenceVisitor(int passNumber, List<String> onClickListeners) {
         this.passNumber = passNumber;
         this.onClickListeners = onClickListeners;
         try {
@@ -64,13 +64,13 @@ public class InferenceVisitor extends AbstractStmtSwitch {
      */
     private boolean checkIntentCallEdge(String activityBody, String callee) {
         String lines[] = activityBody.split("\\r?\\n");
-        for(int i = 0; i < lines.length; i++) {
-            String testString = lines[i].replace("\n", "").replace("\r", "");
+        for (String line : lines) {
+            String testString = line.replace("\n", "").replace("\r", "");
             Matcher invokeMatcher = Constants.TARGET_INVOKE_LINE.matcher(testString);
-            if(invokeMatcher.find()) {
+            if (invokeMatcher.find()) {
                 Matcher classMatcher = Constants.TARGET_ACTIVITY.matcher(testString);
-                if(classMatcher.find()) {
-                    if(classMatcher.group(1).equals(callee)) {
+                if (classMatcher.find()) {
+                    if (classMatcher.group(1).equals(callee)) {
                         return true;
                     }
                 }
@@ -156,16 +156,18 @@ public class InferenceVisitor extends AbstractStmtSwitch {
         SootClass methodClass = method.getDeclaringClass();
         if(method.isConstructor()
                 && method.getParameterCount() == 1
-                && (method.getParameterType(0).toString().contains("Main")
-                        || method.getParameterType(0).toString().contains("main"))) {
-            ValueBox valueBox = stmt.getInvokeExprBox();
+                && Utilities.checkInterfaces(methodClass, Constants.ON_CLICK_LISTENER_CLASS)
+                && method.hasActiveBody()
+                && !Utilities.androidSkip(methodClass)) {
             this.logWriter.writeScratch(methodClass.getName());
-            this.logWriter.writeScratch("\t" + methodClass.getType().toString());
-            this.logWriter.writeScratch("\t" + valueBox.toString());
         }
     }
 
-    public void storeGraphEdges(InvokeStmt stmt) {
+    /**
+     * store unlabeled edges that go from one activity to annother
+     * @param stmt the invoke stmt
+     */
+    private void storeGraphEdges(InvokeStmt stmt) {
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
         if(method.isConstructor()
