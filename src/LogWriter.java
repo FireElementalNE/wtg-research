@@ -12,7 +12,7 @@ public class LogWriter {
      * @param msg the msg
      * @return the msg with a timestamp;
      */
-    public static String formatMsg(String msg) {
+    private static String formatMsg(String msg) {
         Date date = new Date();
         return String.format("[%s]: %s\n", Constants.DATE_FORMAT.format(date),msg);
     }
@@ -79,7 +79,7 @@ public class LogWriter {
      * write to the stdout log
      * @param str the string to write
      */
-    public void writeOut(String str)  {
+    void writeOut(String str)  {
         this.writeFile(this.fileOut, str);
     }
 
@@ -87,7 +87,7 @@ public class LogWriter {
      * write to the stderr log
      * @param str the string to write
      */
-    public void writeErr(String str) {
+    void writeErr(String str) {
         this.writeFile(this.fileErr, str);
     }
 
@@ -95,7 +95,7 @@ public class LogWriter {
      * write to the scratch log, this is for testing purposes
      * @param str the string to write
      */
-    public void writeScratch(String str) {
+    void writeScratch(String str) {
         this.writeFile(this.fileScratch, str);
     }
 }
