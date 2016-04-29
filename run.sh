@@ -7,7 +7,7 @@ DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"
 JAVA_LIBS=`find ./classpath_includes/ -name '*.jar' | xargs | sed 's/ /:/g'`
 SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
-DEFAULT_MEM="8196m"
+DEFAULT_MEM="8196M"
 
 usage() { 
   printf "Usage: $0 [-v] [-t <ANDROID APK>] [-m <MEMORY>]\n" 1>&2 
