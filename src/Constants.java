@@ -9,6 +9,7 @@ public class Constants {
     final static String SET_ONCLICK_LISTNER = "setOnClickListener";
     final static String ONCLICK = "onClick";
     final static String CONTEXT_CLASS = "android.content.Context";
+    final static String ON_CLICK_LISTENER_CLASS = "android.view.ViewOnClickListener";
     final static String JAVA_CLASS_CLASS = "java.lang.Class";
 
     final static String LOG_OUT_SUFFIX = "_out.log";
@@ -21,7 +22,7 @@ public class Constants {
     final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
     final static Pattern TARGET_INVOKE_LINE = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
     final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
-    public final static Pattern ON_CLICK_LISTENER_CLASS = Pattern.compile("^android\\.view\\.View[\\$\\.]OnClickListener$");
+
 
     final static boolean PRINT_ST = true;
     final static boolean DEBUG = false;
