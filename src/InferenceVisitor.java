@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 
 class InferenceVisitor extends AbstractStmtSwitch {
     private LogWriter logWriter;
-    public Map<String, List<String>> edges;
+    Map<String, List<String>> edges;
     List<String> UIElements;
-    List<String> onClickListeners;
+    List<SootClass> onClickListeners;
     private int passNumber;
 
     /**
@@ -43,7 +43,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
      * @param passNumber the pass number
      * @param onClickListeners the list of onclicklisteners from the first pass
      */
-    InferenceVisitor(int passNumber, List<String> onClickListeners) {
+    InferenceVisitor(int passNumber, List<SootClass> onClickListeners) {
         this.passNumber = passNumber;
         this.onClickListeners = onClickListeners;
         try {
@@ -105,43 +105,19 @@ class InferenceVisitor extends AbstractStmtSwitch {
     }
     /**
      * TODO: Fix this method
-     * Trys to find an onclick from an onclick listener method
+     * Trys to find the UI element calling setOnClickListner
      * @param stmt the current invoke stmt
      */
-    private void getOnClickMethodFromListner(InvokeStmt stmt) {
+    private void getUIElement(InvokeStmt stmt) {
         // TODO: Get UI element
-        // Idea:
-        //  1. Find onclick listner get the first arg which will be of type View.OnClickListener()
-        //  2. Get the onClick method of that listner
-        //  3. ...
-        //  4. Profit
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
                 this.logWriter.writeScratch("OnClickListner has active body.");
-                ValueBox valueBox = stmt.getInvokeExprBox();
-                this.logWriter.writeScratch("\t" + valueBox.getValue().toString());
-                try {
-                    // does no find "onClick" because at this point we have a
-                    //   parameter not a full SootClass...
-                    // NOTE: I can get MainActivity as an incident edge to this method
-                    //   using the cg
-                    SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
-                    if (onClickMethod.hasActiveBody()) {
-                        this.logWriter.writeScratch(onClickMethod.getActiveBody().toString());
-                    } else {
-                        this.logWriter.writeErr("No active body.");
-                    }
-                } catch (RuntimeException rte) {
-                    if (Constants.PRINT_ST) {
-                        rte.printStackTrace();
-                    }
-                    this.logWriter.writeErr(rte.getMessage());
-                }
-            }
-            else {
-                this.logWriter.writeErr("Method has no active body.");
+                // TODO: Need to get the button (or whatever)
+                // Have to find the _button_ in: button.setOnClickListner()
+                // We have a list of OnClickListners at this point (this is the second pass)
             }
         }
     }
@@ -159,12 +135,30 @@ class InferenceVisitor extends AbstractStmtSwitch {
                 && Utilities.checkInterfaces(methodClass, Constants.ON_CLICK_LISTENER_CLASS)
                 && method.hasActiveBody()
                 && !Utilities.androidSkip(methodClass)) {
-            this.logWriter.writeScratch(methodClass.getName());
+            this.logWriter.writeOut(methodClass.getName());
+            List <SootMethod> methods = methodClass.getMethods();
+            this.logWriter.writeOut("\tMethods found: " + methods.size());
+            try {
+                SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
+                if (onClickMethod.hasActiveBody()) {
+                    this.logWriter.writeOut(onClickMethod.getActiveBody().toString());
+                } else {
+                    this.logWriter.writeErr("Found onClick, but it has no active body.");
+                }
+            } catch (RuntimeException rte) {
+                if (Constants.PRINT_ST) {
+                    rte.printStackTrace();
+                }
+                this.logWriter.writeErr("Did not find onClick in class " + methodClass.getName() + ".");
+                this.logWriter.writeErr("\t" + rte.getMessage());
+            }
+            this.onClickListeners.add(methodClass);
+
         }
     }
 
     /**
-     * store unlabeled edges that go from one activity to annother
+     * store unlabeled edges that go from one activity to another
      * @param stmt the invoke stmt
      */
     private void storeGraphEdges(InvokeStmt stmt) {
@@ -189,13 +183,14 @@ class InferenceVisitor extends AbstractStmtSwitch {
      */
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
+
         if(stmt.containsInvokeExpr()) {
             if(this.passNumber == 1) {
                 storeGraphEdges(stmt);
                 storeOnClickListenerInvokeStmt(stmt);
             }
             else {
-                getOnClickMethodFromListner(stmt);
+                getUIElement(stmt);
             }
         }
     }
