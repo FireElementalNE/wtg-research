@@ -16,3 +16,5 @@ CLASS_NAME_REGEX = '([\w\.\\\/]+(\$[\d\w]+)?)'
 ACTIVITY_REGEX = '^Activity: ([\w\.]+)$'
 EDGE_REGEX = '^%s\s-->\s%s$' % (CLASS_NAME_REGEX, CLASS_NAME_REGEX)
 NAME_REGEX = '^.*\.(\w+)$'
+# TODO: clean this up
+MESSY_SPLIT_TOKEN = ']: '

@@ -12,7 +12,12 @@ def process_file(in_fh, skip):
 	edges = []
 	count = 0
 	for line in content:
-		if not skip:
+		# TODO: fix this, it is messy
+		if(len(line) < 1):
+			continue
+		# TODO: fix this, it is messy
+		line = line.split(gc.MESSY_SPLIT_TOKEN)[1]
+		if not skip and len(line) > 1:
 			activity_line = re.match(gc.ACTIVITY_REGEX, line)
 			edge_line = re.match(gc.EDGE_REGEX, line)
 			if activity_line:
@@ -20,7 +25,7 @@ def process_file(in_fh, skip):
 			elif edge_line:
 				edges.append([gu.clean_line(edge_line.group(1)), gu.clean_line(edge_line.group(3))])
 			else:
-				if not line.startswith('Skipped:') and len(line) > 1:
+				if not line.startswith('Skipped:'):
 					gu.tprint('WARNING line %d malformed. %s' % (count, line))
 		else:
 			if '-->' not in line:
