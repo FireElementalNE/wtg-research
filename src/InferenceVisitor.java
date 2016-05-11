@@ -1,9 +1,5 @@
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.ValueBox;
-import soot.jimple.AbstractStmtSwitch;
-import soot.jimple.InvokeStmt;
+import soot.*;
+import soot.jimple.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
 
@@ -112,9 +108,23 @@ class InferenceVisitor extends AbstractStmtSwitch {
         // TODO: Get UI element
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
+
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
-                this.logWriter.writeScratch("OnClickListner has active body.");
+                this.logWriter.writeScratch(method.getName() + " has active body.");
+                InvokeExpr invokeExpr = stmt.getInvokeExpr();
+                this.logWriter.writeScratch("Method: " + method.toString());
+                // SpecialInvokeExpr specialInvokeExpr = (SpecialInvokeExpr) invokeExpr;
+                VirtualInvokeExpr virtualInvokeExpr = (VirtualInvokeExpr) invokeExpr;
+                InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
+                Value value = virtualInvokeExpr.getBase();
+                this.logWriter.writeScratch("The Type virtualInvokeExpr -- > " + virtualInvokeExpr.getType().toString());
+                this.logWriter.writeScratch("The Type instanceInvokeExpr -- > " + instanceInvokeExpr.getType().toString());
+                // InterfaceInvokeExpr interfaceInvokeExpr = (InterfaceInvokeExpr) invokeExpr;
+                this.logWriter.writeScratch("VirtualInvokeExpr (BASE) THE TYPE? --> " + virtualInvokeExpr.getBase().getType().toString());
+                // this.logWriter.writeScratch("SpecialInvokeExpr THE TYPE? --> " + specialInvokeExpr.getBase().getType().toString());
+                this.logWriter.writeScratch("InstanceInvokeExpr (BASE) THE TYPE? --> " + instanceInvokeExpr.getBase().getType().toString());
+                // this.logWriter.writeScratch("InterfaceInvokeExpr THE TYPE? --> " + interfaceInvokeExpr.getBase().getType().toString());
                 // TODO: Need to get the button (or whatever)
                 // Have to find the _button_ in: button.setOnClickListner()
                 // We have a list of OnClickListners at this point (this is the second pass)
@@ -156,6 +166,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
 
         }
     }
+
 
     /**
      * store unlabeled edges that go from one activity to another
