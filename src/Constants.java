@@ -12,10 +12,11 @@ public class Constants {
     final static String ON_CLICK_LISTENER_CLASS = "android.view.ViewOnClickListener";
     final static String JAVA_CLASS_CLASS = "java.lang.Class";
 
-    final static String LOG_OUT_SUFFIX = "_out.log";
-    final static String LOG_ERR_SUFFIX = "_err.log";
-    final static String LOG_SCRATCH_SUFFIX = "_scratch.log";
+    final static String LOG_SUFFIX = "_logfile.log";
 
+    final static String OUT_TAG = "OUT";
+    final static String ERR_TAG = "ERR";
+    final static String SCR_TAG = "SCR";
 
     final static String INTENT_CLASS = "android.content.Intent";
 

@@ -5,16 +5,31 @@ import java.io.IOException;
 import java.util.Date;
 
 public class LogWriter {
-    private File fileOut, fileErr, fileScratch;
-
+    private File logFile;
     /**
      * Add a timestamp to a msg
+     * @param lt the log type (enum)
      * @param msg the msg
      * @return the msg with a timestamp;
      */
-    private static String formatMsg(String msg) {
+    private static String formatMsg(LogType lt, String msg) {
+        String prefix;
+        switch (lt) {
+            case ERR:
+                prefix = Constants.ERR_TAG;
+                break;
+            case OUT:
+                prefix = Constants.OUT_TAG;
+                break;
+            case SCR:
+                prefix = Constants.SCR_TAG;
+                break;
+            default:
+                prefix = "???";
+                break;
+        }
         Date date = new Date();
-        return String.format("[%s]: %s\n", Constants.DATE_FORMAT.format(date),msg);
+        return String.format("[%s][%s]: %s\n", Constants.DATE_FORMAT.format(date), prefix, msg);
     }
 
     /**
@@ -23,12 +38,8 @@ public class LogWriter {
      * @throws IOException
      */
     public LogWriter(String className) throws IOException {
-        this.fileOut = new File(className + Constants.LOG_OUT_SUFFIX);
-        this.fileErr = new File(className + Constants.LOG_ERR_SUFFIX);
-        this.fileScratch = new File(className + Constants.LOG_SCRATCH_SUFFIX);
-        this.fileOut.createNewFile();
-        this.fileErr.createNewFile();
-        this.fileScratch.createNewFile();
+        this.logFile = new File(className + Constants.LOG_SUFFIX);
+        this.logFile.createNewFile();
     }
 
 
@@ -40,25 +51,21 @@ public class LogWriter {
      * @throws IOException
      */
     public LogWriter(String className, int passNum) throws IOException {
-        this.fileOut = new File(className + Integer.toString(passNum) + Constants.LOG_OUT_SUFFIX);
-        this.fileErr = new File(className + Integer.toString(passNum) + Constants.LOG_ERR_SUFFIX);
-        this.fileScratch = new File(className + Integer.toString(passNum) + Constants.LOG_SCRATCH_SUFFIX);
-        this.fileOut.createNewFile();
-        this.fileErr.createNewFile();
-        this.fileScratch.createNewFile();
+        this.logFile = new File(className + Integer.toString(passNum) + Constants.LOG_SUFFIX);
+        this.logFile.createNewFile();
     }
 
     /**
      * write to a log file
-     * @param file the file to write to
+     * @param lt the log type (enum)
      * @param str the string to write
      */
-    private void writeFile(File file, String str) {
+    public void write(LogType lt, String str) {
         synchronized (this) {
             try {
-                FileWriter fw_out = new FileWriter(file.getAbsoluteFile(), true);
+                FileWriter fw_out = new FileWriter(this.logFile.getAbsoluteFile(), true);
                 BufferedWriter bw_out = new BufferedWriter(fw_out);
-                bw_out.write(formatMsg(str));
+                bw_out.write(formatMsg(lt, str));
                 bw_out.flush();
                 if(Constants.DEBUG) {
                     System.out.println("LogWriter: " + str);
@@ -75,28 +82,5 @@ public class LogWriter {
         }
     }
 
-    /**
-     * write to the stdout log
-     * @param str the string to write
-     */
-    void writeOut(String str)  {
-        this.writeFile(this.fileOut, str);
-    }
-
-    /**
-     * write to the stderr log
-     * @param str the string to write
-     */
-    void writeErr(String str) {
-        this.writeFile(this.fileErr, str);
-    }
-
-    /**
-     * write to the scratch log, this is for testing purposes
-     * @param str the string to write
-     */
-    void writeScratch(String str) {
-        this.writeFile(this.fileScratch, str);
-    }
 }
 

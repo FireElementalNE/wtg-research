@@ -16,6 +16,7 @@ class InferenceTransformer extends BodyTransformer {
         this.nodes = new ArrayList<>();
         this.edges = new HashMap<>();
         this.UIElements = new ArrayList<>();
+
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
@@ -41,7 +42,7 @@ class InferenceTransformer extends BodyTransformer {
                     this.nodes.add(methodClass.getName());
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
-                    this.logWriter.writeOut(msg);
+                    this.logWriter.write(LogType.OUT, msg);
                 }
             }
         }
@@ -137,7 +138,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void printNodes() {
         for(String entry : this.nodes) {
-            this.logWriter.writeOut("Activity: " + entry);
+            this.logWriter.write(LogType.OUT, "Activity: " + entry);
         }
     }
 
@@ -147,7 +148,7 @@ class InferenceTransformer extends BodyTransformer {
     private void printEdges() {
         for(Map.Entry<String, List<String>> entry : this.edges.entrySet()) {
             for(String string : entry.getValue()) {
-                this.logWriter.writeOut(entry.getKey() + " --> " + string);
+                this.logWriter.write(LogType.OUT, entry.getKey() + " --> " + string);
             }
         }
     }
@@ -157,7 +158,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void printUIElements() {
         for(String el : this.UIElements) {
-            this.logWriter.writeScratch(el);
+            this.logWriter.write(LogType.SCR, el);
         }
     }
 }
