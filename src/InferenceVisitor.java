@@ -147,7 +147,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
                 && !Utilities.androidSkip(methodClass)) {
             //this.logWriter.write(LogType.OUT, methodClass.getName());
             List <SootMethod> methods = methodClass.getMethods();
-            this.logWriter.write(LogType.OUT,"\tNumber of methods found  in "
+            this.logWriter.write(LogType.OUT,"Number of methods found  in "
                     + methodClass.getName()
                     + " (storeOnClickListenerInvokeStmt): " + methods.size());
             try {

@@ -1,7 +1,7 @@
 import os
 
 # Default values
-DEFAULT_INPUT_LOG = os.path.join('..', 'InferenceTransformer_out.log')
+DEFAULT_INPUT_LOG = os.path.join('..', 'InferenceTransformer_logfile.log')
 DEFAULT_OUTPUT_NAME = 'out'
 DEFAULT_VERBOSE = False
 DEFAULT_SOOT_OUTPUT = os.path.join('..', 'sootOutput')
