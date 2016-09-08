@@ -158,7 +158,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void printUIElements() {
         for(String el : this.UIElements) {
-            this.logWriter.write(LogType.SCR, el);
+            this.logWriter.write(LogType.SCR, "A UI Element: " + el);
         }
     }
 }

@@ -100,10 +100,10 @@ class InferenceVisitor extends AbstractStmtSwitch {
         }
     }
     /**
-     * TODO: Fix this method
      * Trys to find the UI element calling setOnClickListner
      * @param stmt the current invoke stmt
      */
+    // TODO: Fix this method
     private void getUIElement(InvokeStmt stmt) {
         // TODO: Get UI element
         SootMethod method = stmt.getInvokeExpr().getMethod();
@@ -125,6 +125,12 @@ class InferenceVisitor extends AbstractStmtSwitch {
                 // this.logWriter.writeScratch("SpecialInvokeExpr THE TYPE? --> " + specialInvokeExpr.getBase().getType().toString());
                 this.logWriter.write(LogType.SCR, "InstanceInvokeExpr (BASE) THE TYPE? --> " + instanceInvokeExpr.getBase().getType().toString());
                 // this.logWriter.writeScratch("InterfaceInvokeExpr THE TYPE? --> " + interfaceInvokeExpr.getBase().getType().toString());
+                this.logWriter.write(LogType.SCR, "Value --> " + value.toString());
+                this.logWriter.write(LogType.SCR, "Value (Type)" + value.getType().toString());
+                ValueBox valueBox = stmt.getInvokeExprBox();
+                this.logWriter.write(LogType.SCR, valueBox.toString());
+                this.logWriter.write(LogType.SCR, valueBox.getValue().toString());
+                this.logWriter.write(LogType.SCR, valueBox.getValue().getType().toString());
                 // TODO: Need to get the button (or whatever)
                 // Have to find the _button_ in: button.setOnClickListner()
                 // We have a list of OnClickListners at this point (this is the second pass)
