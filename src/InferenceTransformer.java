@@ -1,4 +1,5 @@
 import soot.*;
+import soot.util.Chain;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,6 +40,12 @@ class InferenceTransformer extends BodyTransformer {
             // SootClass method_superclass = method_class.getSuperclass();
             if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
                 if (!Utilities.androidSkip(methodClass)) {
+                    Chain <SootField> sootFieldChain = methodClass.getFields();
+                    for(SootField sootField : sootFieldChain) {
+                        String decl_msg = String.format("%S has declaration: \'%s\'",
+                                methodClass.getName(), sootField.getDeclaration());
+                        this.logWriter.write(LogType.OUT, decl_msg);
+                    }
                     this.nodes.add(methodClass.getName());
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
