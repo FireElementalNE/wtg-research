@@ -18,3 +18,5 @@ EDGE_REGEX = '^%s\s-->\s%s$' % (CLASS_NAME_REGEX, CLASS_NAME_REGEX)
 NAME_REGEX = '^.*\.(\w+)$'
 # TODO: clean this up
 MESSY_SPLIT_TOKEN = ']: '
+
+NOPARSE = "NOPARSE"

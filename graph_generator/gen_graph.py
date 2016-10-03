@@ -25,7 +25,7 @@ def process_file(in_fh, skip):
 			elif edge_line:
 				edges.append([gu.clean_line(edge_line.group(1)), gu.clean_line(edge_line.group(3))])
 			else:
-				if not line.startswith('Skipped:'):
+				if not line.startswith(gc.NOPARSE):
 					gu.tprint('WARNING line %d malformed. %s' % (count, line))
 		else:
 			if '-->' not in line:
