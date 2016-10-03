@@ -8,7 +8,7 @@ import java.util.*;
 class InferenceTransformer extends BodyTransformer {
     private Map <String, List<String>> edges;
     private List<String> nodes;
-    private List<String> UIElements;
+    private Map<SootClass, List<SootField>> UIElements;
     private LogWriter logWriter;
     /**
      * Constructor
@@ -16,7 +16,7 @@ class InferenceTransformer extends BodyTransformer {
     InferenceTransformer() {
         this.nodes = new ArrayList<>();
         this.edges = new HashMap<>();
-        this.UIElements = new ArrayList<>();
+        this.UIElements = new HashMap<>();
 
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
@@ -37,34 +37,25 @@ class InferenceTransformer extends BodyTransformer {
     private void checkForActivities(SootClass methodClass, SootMethod method) {
         // this finds all of the custom activities (activities that do not start with android.<something>)
         if(methodClass.hasSuperclass() && method.isConstructor()) {
-            // SootClass method_superclass = method_class.getSuperclass();
             if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
                 if (!Utilities.androidSkip(methodClass)) {
                     Chain <SootField> sootFieldChain = methodClass.getFields();
+                    this.UIElements.put(methodClass, new ArrayList<>());
                     for(SootField sootField : sootFieldChain) {
                         String decl_msg = String.format("%S has declaration: \'%s\'",
                                 methodClass.getName(), sootField.getDeclaration());
-                        this.logWriter.write(LogType.OUT, decl_msg);
+                        this.logWriter.write(LogType.OUT, decl_msg, true);
+                        // add sootField to UIElements Map
+                        this.UIElements.get(methodClass).add(sootField);
                     }
                     this.nodes.add(methodClass.getName());
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
-                    this.logWriter.write(LogType.OUT, msg);
+                    this.logWriter.write(LogType.OUT, msg, true);
                 }
             }
         }
     }
-
-    /**
-     * Updates the UI element list, not currently used
-     * @param visitor the InferenceVisitor that holds the new UIElements
-     */
-    private void updateUIElements(InferenceVisitor visitor) {
-        for(String el : visitor.UIElements) {
-            this.UIElements.add(el);
-        }
-    }
-
     /**
      * Updates the edges list after the InferenceVisitor runs through the method
      * @param visitor the InferenceVisitor that holds the new edges
@@ -90,13 +81,12 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void sendToVisitorFirstPass(Body body) {
         final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitor visitor = new InferenceVisitor(1);
+        InferenceVisitor visitor = new InferenceVisitor(1, this.UIElements);
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
         }
         updateEdges(visitor);
-        updateUIElements(visitor);
         sendToVisitorSecondPass(body, visitor);
     }
 
@@ -145,7 +135,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void printNodes() {
         for(String entry : this.nodes) {
-            this.logWriter.write(LogType.OUT, "Activity: " + entry);
+            this.logWriter.write(LogType.OUT, "Activity: " + entry, false);
         }
     }
 
@@ -155,7 +145,7 @@ class InferenceTransformer extends BodyTransformer {
     private void printEdges() {
         for(Map.Entry<String, List<String>> entry : this.edges.entrySet()) {
             for(String string : entry.getValue()) {
-                this.logWriter.write(LogType.OUT, entry.getKey() + " --> " + string);
+                this.logWriter.write(LogType.OUT, entry.getKey() + " --> " + string, false);
             }
         }
     }
@@ -164,8 +154,12 @@ class InferenceTransformer extends BodyTransformer {
      * Print UI elements
      */
     private void printUIElements() {
-        for(String el : this.UIElements) {
-            this.logWriter.write(LogType.SCR, "A UI Element: " + el);
-        }
+        // Java 8 Goodness
+        this.UIElements.forEach((k,v)->{
+            List <SootField> activity_uielements = this.UIElements.get(k);
+            for(SootField uielement : activity_uielements) {
+                this.logWriter.write(LogType.SCR, "A UI Element: " + uielement + " ==> " + k, true);
+            }
+        });
     }
 }

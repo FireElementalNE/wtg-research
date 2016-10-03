@@ -18,6 +18,8 @@ public class Constants {
     final static String ERR_TAG = "ERR";
     final static String SCR_TAG = "SCR";
 
+    final static String NOPARSE = "NOPARSE";
+
     final static String INTENT_CLASS = "android.content.Intent";
 
     final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");

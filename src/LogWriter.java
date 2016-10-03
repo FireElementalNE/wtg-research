@@ -10,9 +10,11 @@ public class LogWriter {
      * Add a timestamp to a msg
      * @param lt the log type (enum)
      * @param msg the msg
+     * @param noparse whether to append Constants.NOPARSE
+     *                to string (for gen_graph.py)
      * @return the msg with a timestamp;
      */
-    private static String formatMsg(LogType lt, String msg) {
+    private static String formatMsg(LogType lt, String msg, boolean noparse) {
         String prefix;
         switch (lt) {
             case ERR:
@@ -29,7 +31,14 @@ public class LogWriter {
                 break;
         }
         Date date = new Date();
-        return String.format("[%s][%s]: %s\n", Constants.DATE_FORMAT.format(date), prefix, msg);
+        String format_string;
+        if(noparse) {
+            format_string = "[%s][%s]: " + Constants.NOPARSE + " %s\n";
+        }
+        else {
+            format_string = "[%s][%s]: %s\n";
+        }
+        return String.format(format_string, Constants.DATE_FORMAT.format(date), prefix, msg);
     }
 
     /**
@@ -59,13 +68,15 @@ public class LogWriter {
      * write to a log file
      * @param lt the log type (enum)
      * @param str the string to write
+     * @param noparse whether to append Constants.NOPARSE
+     *                to string (for gen_graph.py)
      */
-    public void write(LogType lt, String str) {
+    public void write(LogType lt, String str, boolean noparse) {
         synchronized (this) {
             try {
                 FileWriter fw_out = new FileWriter(this.logFile.getAbsoluteFile(), true);
                 BufferedWriter bw_out = new BufferedWriter(fw_out);
-                bw_out.write(formatMsg(lt, str));
+                bw_out.write(formatMsg(lt, str, noparse));
                 bw_out.flush();
                 if(Constants.DEBUG) {
                     System.out.println("LogWriter: " + str);
@@ -81,6 +92,5 @@ public class LogWriter {
             notify();
         }
     }
-
 }
 

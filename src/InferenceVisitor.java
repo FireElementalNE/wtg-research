@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 class InferenceVisitor extends AbstractStmtSwitch {
     private LogWriter logWriter;
     Map<String, List<String>> edges;
-    List<String> UIElements;
+    Map<SootClass, List<SootField>> activity_UIElements;
     List<SootClass> onClickListeners;
     private int passNumber;
 
@@ -19,8 +19,8 @@ class InferenceVisitor extends AbstractStmtSwitch {
      * Constructor for first pass
      * @param passNumber the pass number
      */
-    InferenceVisitor(int passNumber) {
-        this.UIElements = new ArrayList<>();
+    InferenceVisitor(int passNumber, Map<SootClass, List<SootField>> uielements) {
+        this.activity_UIElements = uielements;
         this.edges = new HashMap<>();
         this.onClickListeners = new ArrayList<>();
         this.passNumber = passNumber;
@@ -108,29 +108,28 @@ class InferenceVisitor extends AbstractStmtSwitch {
         // TODO: Get UI element
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
-
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
-                this.logWriter.write(LogType.SCR, method.getName() + " has active body.");
+                this.logWriter.write(LogType.SCR, method.getName() + " has active body.", true);
                 InvokeExpr invokeExpr = stmt.getInvokeExpr();
-                this.logWriter.write(LogType.SCR, "Method: " + method.toString());
+                this.logWriter.write(LogType.SCR, "Method: " + method.toString(), true);
                 // SpecialInvokeExpr specialInvokeExpr = (SpecialInvokeExpr) invokeExpr;
                 VirtualInvokeExpr virtualInvokeExpr = (VirtualInvokeExpr) invokeExpr;
                 InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
                 Value value = virtualInvokeExpr.getBase();
-                this.logWriter.write(LogType.SCR, "The Type virtualInvokeExpr -- > " + virtualInvokeExpr.getType().toString());
-                this.logWriter.write(LogType.SCR, "The Type instanceInvokeExpr -- > " + instanceInvokeExpr.getType().toString());
+                this.logWriter.write(LogType.SCR, "The Type virtualInvokeExpr -- > " + virtualInvokeExpr.getType().toString(), true);
+                this.logWriter.write(LogType.SCR, "The Type instanceInvokeExpr -- > " + instanceInvokeExpr.getType().toString(), true);
                 // InterfaceInvokeExpr interfaceInvokeExpr = (InterfaceInvokeExpr) invokeExpr;
-                this.logWriter.write(LogType.SCR, "VirtualInvokeExpr (BASE) THE TYPE? --> " + virtualInvokeExpr.getBase().getType().toString());
+                this.logWriter.write(LogType.SCR, "VirtualInvokeExpr (BASE) THE TYPE? --> " + virtualInvokeExpr.getBase().getType().toString(), true);
                 // this.logWriter.writeScratch("SpecialInvokeExpr THE TYPE? --> " + specialInvokeExpr.getBase().getType().toString());
-                this.logWriter.write(LogType.SCR, "InstanceInvokeExpr (BASE) THE TYPE? --> " + instanceInvokeExpr.getBase().getType().toString());
+                this.logWriter.write(LogType.SCR, "InstanceInvokeExpr (BASE) THE TYPE? --> " + instanceInvokeExpr.getBase().getType().toString(), true);
                 // this.logWriter.writeScratch("InterfaceInvokeExpr THE TYPE? --> " + interfaceInvokeExpr.getBase().getType().toString());
-                this.logWriter.write(LogType.SCR, "Value --> " + value.toString());
-                this.logWriter.write(LogType.SCR, "Value (Type)" + value.getType().toString());
+                this.logWriter.write(LogType.SCR, "Value --> " + value.toString(), true);
+                this.logWriter.write(LogType.SCR, "Value (Type)" + value.getType().toString(), true);
                 ValueBox valueBox = stmt.getInvokeExprBox();
-                this.logWriter.write(LogType.SCR, valueBox.toString());
-                this.logWriter.write(LogType.SCR, valueBox.getValue().toString());
-                this.logWriter.write(LogType.SCR, valueBox.getValue().getType().toString());
+                this.logWriter.write(LogType.SCR, valueBox.toString(), true);
+                this.logWriter.write(LogType.SCR, valueBox.getValue().toString(), true);
+                this.logWriter.write(LogType.SCR, valueBox.getValue().getType().toString(), true);
                 // TODO: Need to get the button (or whatever)
                 // Have to find the _button_ in: button.setOnClickListner()
                 // We have a list of OnClickListners at this point (this is the second pass)
@@ -155,21 +154,21 @@ class InferenceVisitor extends AbstractStmtSwitch {
             List <SootMethod> methods = methodClass.getMethods();
             this.logWriter.write(LogType.OUT,"Number of methods found  in "
                     + methodClass.getName()
-                    + " (storeOnClickListenerInvokeStmt): " + methods.size());
+                    + " (storeOnClickListenerInvokeStmt): " + methods.size(), true);
             try {
                 SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
                 if (onClickMethod.hasActiveBody()) {
-                    this.logWriter.write(LogType.OUT, "Found onClick, and it has an active body.");
+                    this.logWriter.write(LogType.OUT, "Found onClick, and it has an active body.", true);
                     // this.logWriter.writeOut(onClickMethod.getActiveBody().toString());
                 } else {
-                    this.logWriter.write(LogType.ERR, "Found onClick, but it has no active body.");
+                    this.logWriter.write(LogType.ERR, "Found onClick, but it has no active body.", true);
                 }
             } catch (RuntimeException rte) {
                 if (Constants.PRINT_ST) {
                     rte.printStackTrace();
                 }
-                this.logWriter.write(LogType.ERR, "Did not find onClick in class " + methodClass.getName() + ".");
-                this.logWriter.write(LogType.ERR, "\t" + rte.getMessage());
+                this.logWriter.write(LogType.ERR, "Did not find onClick in class " + methodClass.getName() + ".", true);
+                this.logWriter.write(LogType.ERR, "\t" + rte.getMessage(), true);
             }
             this.onClickListeners.add(methodClass);
 

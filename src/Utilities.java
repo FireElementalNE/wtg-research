@@ -68,7 +68,7 @@ public class Utilities {
     }
 
     /**
-     * tests whether a class is an android class (part of the android packager)
+     * tests whether a class is an android class (part of the android package)
      * @param sootClass the class
      * @return true iff the class is an android class
      */
