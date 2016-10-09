@@ -13,17 +13,23 @@ class InferenceVisitor extends AbstractStmtSwitch {
     Map<String, List<String>> edges;
     Map<SootClass, List<SootField>> activity_UIElements;
     List<SootClass> onClickListeners;
+    private SootClass activity_class;
+    private List <String> nodes;
     private int passNumber;
 
     /**
      * Constructor for first pass
      * @param passNumber the pass number
+     * @param activityclass the activity class
+     * @param nodes the current list of activities
      */
-    InferenceVisitor(int passNumber, Map<SootClass, List<SootField>> uielements) {
+    InferenceVisitor(int passNumber, Map<SootClass, List<SootField>> uielements, SootClass activityclass, List<String> nodes) {
         this.activity_UIElements = uielements;
         this.edges = new HashMap<>();
         this.onClickListeners = new ArrayList<>();
         this.passNumber = passNumber;
+        this.activity_class = activityclass;
+        this.nodes = nodes;
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
         } catch (IOException e) {
@@ -38,10 +44,14 @@ class InferenceVisitor extends AbstractStmtSwitch {
      * Constructor for the second pass
      * @param passNumber the pass number
      * @param onClickListeners the list of onclicklisteners from the first pass
+     * @param activityclass the activity class
+     * @param nodes the current list of activities
      */
-    InferenceVisitor(int passNumber, List<SootClass> onClickListeners) {
+    InferenceVisitor(int passNumber, List<SootClass> onClickListeners, SootClass activityclass, List<String> nodes) {
         this.passNumber = passNumber;
         this.onClickListeners = onClickListeners;
+        this.activity_class = activityclass;
+        this.nodes = nodes;
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
         } catch (IOException e) {
@@ -108,28 +118,24 @@ class InferenceVisitor extends AbstractStmtSwitch {
         // TODO: Get UI element
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
+        Value value  = stmt.getInvokeExprBox().getValue();
+        if(this.nodes.contains(this.activity_class.getName())) {
+            // TODO: we never get here, see results as to why
+            // need to gfigure out how to get the correct element from the proper place
+            // currently trying to get jimple declarations from the class
+            // i.e. find $r1 (which would be a UI element) in an activity
+            SootField sootField = this.activity_class.getFieldByName(value.toString());
+            this.logWriter.write(LogType.SCR, "sootfield? --> " + sootField.getDeclaration(), true);
+        }
         if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
             if(method.hasActiveBody()) {
+                this.logWriter.write(LogType.SCR, "Method class --> " + methodClass.getName(), true);
+                this.logWriter.write(LogType.SCR, "activity_class --> " + activity_class.getName(), true);
                 this.logWriter.write(LogType.SCR, method.getName() + " has active body.", true);
-                InvokeExpr invokeExpr = stmt.getInvokeExpr();
                 this.logWriter.write(LogType.SCR, "Method: " + method.toString(), true);
-                // SpecialInvokeExpr specialInvokeExpr = (SpecialInvokeExpr) invokeExpr;
-                VirtualInvokeExpr virtualInvokeExpr = (VirtualInvokeExpr) invokeExpr;
-                InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
-                Value value = virtualInvokeExpr.getBase();
-                this.logWriter.write(LogType.SCR, "The Type virtualInvokeExpr -- > " + virtualInvokeExpr.getType().toString(), true);
-                this.logWriter.write(LogType.SCR, "The Type instanceInvokeExpr -- > " + instanceInvokeExpr.getType().toString(), true);
-                // InterfaceInvokeExpr interfaceInvokeExpr = (InterfaceInvokeExpr) invokeExpr;
-                this.logWriter.write(LogType.SCR, "VirtualInvokeExpr (BASE) THE TYPE? --> " + virtualInvokeExpr.getBase().getType().toString(), true);
-                // this.logWriter.writeScratch("SpecialInvokeExpr THE TYPE? --> " + specialInvokeExpr.getBase().getType().toString());
-                this.logWriter.write(LogType.SCR, "InstanceInvokeExpr (BASE) THE TYPE? --> " + instanceInvokeExpr.getBase().getType().toString(), true);
-                // this.logWriter.writeScratch("InterfaceInvokeExpr THE TYPE? --> " + interfaceInvokeExpr.getBase().getType().toString());
                 this.logWriter.write(LogType.SCR, "Value --> " + value.toString(), true);
                 this.logWriter.write(LogType.SCR, "Value (Type)" + value.getType().toString(), true);
-                ValueBox valueBox = stmt.getInvokeExprBox();
-                this.logWriter.write(LogType.SCR, valueBox.toString(), true);
-                this.logWriter.write(LogType.SCR, valueBox.getValue().toString(), true);
-                this.logWriter.write(LogType.SCR, valueBox.getValue().getType().toString(), true);
+                this.logWriter.write(LogType.SCR, "I think I already know this will not work --> " + stmt.getInvokeExprBox(), true);
                 // TODO: Need to get the button (or whatever)
                 // Have to find the _button_ in: button.setOnClickListner()
                 // We have a list of OnClickListners at this point (this is the second pass)
@@ -202,7 +208,6 @@ class InferenceVisitor extends AbstractStmtSwitch {
      */
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
-
         if(stmt.containsInvokeExpr()) {
             if(this.passNumber == 1) {
                 storeGraphEdges(stmt);

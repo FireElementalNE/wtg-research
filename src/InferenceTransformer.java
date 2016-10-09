@@ -34,7 +34,7 @@ class InferenceTransformer extends BodyTransformer {
      * @param methodClass the current class calling the current method
      * @param method the current method
      */
-    private void checkForActivities(SootClass methodClass, SootMethod method) {
+    private boolean checkForActivities(SootClass methodClass, SootMethod method) {
         // this finds all of the custom activities (activities that do not start with android.<something>)
         if(methodClass.hasSuperclass() && method.isConstructor()) {
             if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
@@ -49,12 +49,16 @@ class InferenceTransformer extends BodyTransformer {
                         this.UIElements.get(methodClass).add(sootField);
                     }
                     this.nodes.add(methodClass.getName());
+                    return true;
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
                     this.logWriter.write(LogType.OUT, msg, true);
+                    return false;
                 }
             }
+            return false;
         }
+        return false;
     }
     /**
      * Updates the edges list after the InferenceVisitor runs through the method
@@ -81,7 +85,8 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void sendToVisitorFirstPass(Body body) {
         final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitor visitor = new InferenceVisitor(1, this.UIElements);
+        SootClass current_class = body.getMethod().getDeclaringClass();
+        InferenceVisitor visitor = new InferenceVisitor(1, this.UIElements, current_class, this.nodes);
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
@@ -97,7 +102,8 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void sendToVisitorSecondPass(Body body, InferenceVisitor visitor) {
         final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitor visitorSecondPass = new InferenceVisitor(2, visitor.onClickListeners);
+        SootClass current_class = body.getMethod().getDeclaringClass();
+        InferenceVisitor visitorSecondPass = new InferenceVisitor(2, visitor.onClickListeners, current_class, this.nodes);
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitorSecondPass);
@@ -112,9 +118,6 @@ class InferenceTransformer extends BodyTransformer {
      */
     @Override
     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-        SootMethod method = body.getMethod();
-        SootClass methodClass = method.getDeclaringClass();
-        checkForActivities(methodClass, method);
         // See comments on getOnClickMethodFromListner()
         // getOnClickMethodFromListner(methodClass, method);
         // send to InferenceVisitor
