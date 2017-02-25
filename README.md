@@ -55,10 +55,11 @@ tree -S -P "*.jar" --charset=ascii --prune -n
 run.sh has the following usage:  
 ```
 bash $ ./run.sh -h
-Usage: ./run.sh [-v] [-t <ANDROID APK>] [-m <MEMORY>]
+Usage: ./run.sh [-v] [-t <ANDROID APK>] [-m <MEMORY>] [-c]
 	-v shows soot's (very) verbose output
 	-t <ANDROID APK> sets the target apk
 	-m <MEMORY> sets the max java memory (-Xmx)
+	-c clean up dirs
 ```
 
 # Requirements
