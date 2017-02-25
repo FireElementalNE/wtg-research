@@ -1,3 +1,4 @@
+import androidgraph.WTGGraphNode;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -11,49 +12,23 @@ import java.util.regex.Matcher;
 class InferenceVisitor extends AbstractStmtSwitch {
     private LogWriter logWriter;
     Map<String, List<String>> edges;
-    Map<SootClass, List<SootField>> activity_UIElements;
-    List<SootClass> onClickListeners;
     private SootClass activity_class;
-    private List <String> nodes;
-    private int passNumber;
+    private List<WTGGraphNode> graph_nodes;
+    private int pass_number;
 
     /**
      * Constructor for first pass
-     * @param passNumber the pass number
+     * @param pass_number the pass number
      * @param activityclass the activity class
-     * @param nodes the current list of activities
+     * @param graph_nodes the current list of WTGGraphNodes
      */
-    InferenceVisitor(int passNumber, Map<SootClass, List<SootField>> uielements, SootClass activityclass, List<String> nodes) {
-        this.activity_UIElements = uielements;
+    InferenceVisitor(SootClass activityclass, List<WTGGraphNode> graph_nodes, int pass_number) {
         this.edges = new HashMap<>();
-        this.onClickListeners = new ArrayList<>();
-        this.passNumber = passNumber;
+        this.pass_number = pass_number;
         this.activity_class = activityclass;
-        this.nodes = nodes;
+        this.graph_nodes = graph_nodes;
         try {
-            this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
-        } catch (IOException e) {
-            System.err.println("InferenceVisitor: Declaring LogWriter Failed");
-            if(Constants.PRINT_ST) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Constructor for the second pass
-     * @param passNumber the pass number
-     * @param onClickListeners the list of onclicklisteners from the first pass
-     * @param activityclass the activity class
-     * @param nodes the current list of activities
-     */
-    InferenceVisitor(int passNumber, List<SootClass> onClickListeners, SootClass activityclass, List<String> nodes) {
-        this.passNumber = passNumber;
-        this.onClickListeners = onClickListeners;
-        this.activity_class = activityclass;
-        this.nodes = nodes;
-        try {
-            this.logWriter = new LogWriter(this.getClass().getSimpleName(), passNumber);
+            this.logWriter = new LogWriter(this.getClass().getSimpleName(), pass_number);
         } catch (IOException e) {
             System.err.println("InferenceVisitor: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {
@@ -101,7 +76,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
             // TODO: issue remains
             if(checkIntentCallEdge(src.getActiveBody().toString(), callee)) {
                 if (!this.edges.keySet().contains(srcClass.getName())) {
-                    this.edges.put(srcClass.getName(), new ArrayList<String>());
+                    this.edges.put(srcClass.getName(), new ArrayList<>());
                 }
                 if(!this.edges.get(srcClass.getName()).contains(callee)) {
                     this.edges.get(srcClass.getName()).add(callee);
@@ -109,78 +84,6 @@ class InferenceVisitor extends AbstractStmtSwitch {
             }
         }
     }
-    /**
-     * Trys to find the UI element calling setOnClickListner
-     * @param stmt the current invoke stmt
-     */
-    // TODO: Fix this method
-    private void getUIElement(InvokeStmt stmt) {
-        // TODO: Get UI element
-        SootMethod method = stmt.getInvokeExpr().getMethod();
-        SootClass methodClass = method.getDeclaringClass();
-        Value value  = stmt.getInvokeExprBox().getValue();
-        if(this.nodes.contains(this.activity_class.getName())) {
-            // TODO: we never get here, see results as to why
-            // need to gfigure out how to get the correct element from the proper place
-            // currently trying to get jimple declarations from the class
-            // i.e. find $r1 (which would be a UI element) in an activity
-            SootField sootField = this.activity_class.getFieldByName(value.toString());
-            this.logWriter.write(LogType.SCR, "sootfield? --> " + sootField.getDeclaration(), true);
-        }
-        if(method.getName().contains(Constants.SET_ONCLICK_LISTNER)) {
-            if(method.hasActiveBody()) {
-                this.logWriter.write(LogType.SCR, "Method class --> " + methodClass.getName(), true);
-                this.logWriter.write(LogType.SCR, "activity_class --> " + activity_class.getName(), true);
-                this.logWriter.write(LogType.SCR, method.getName() + " has active body.", true);
-                this.logWriter.write(LogType.SCR, "Method: " + method.toString(), true);
-                this.logWriter.write(LogType.SCR, "Value --> " + value.toString(), true);
-                this.logWriter.write(LogType.SCR, "Value (Type)" + value.getType().toString(), true);
-                this.logWriter.write(LogType.SCR, "I think I already know this will not work --> " + stmt.getInvokeExprBox(), true);
-                // TODO: Need to get the button (or whatever)
-                // Have to find the _button_ in: button.setOnClickListner()
-                // We have a list of OnClickListners at this point (this is the second pass)
-            }
-        }
-    }
-
-    /**
-     * Store onclick listeners on the _first_ pass so that they can be used
-     * on the _second_ pass
-     * @param stmt the InvokeStmt currently being analyzed
-     */
-    private void storeOnClickListenerInvokeStmt(InvokeStmt stmt) {
-        SootMethod method = stmt.getInvokeExpr().getMethod();
-        SootClass methodClass = method.getDeclaringClass();
-        if(method.isConstructor()
-                && method.getParameterCount() == 1
-                && Utilities.checkInterfaces(methodClass, Constants.ON_CLICK_LISTENER_CLASS)
-                && method.hasActiveBody()
-                && !Utilities.androidSkip(methodClass)) {
-            //this.logWriter.write(LogType.OUT, methodClass.getName());
-            List <SootMethod> methods = methodClass.getMethods();
-            this.logWriter.write(LogType.OUT,"Number of methods found  in "
-                    + methodClass.getName()
-                    + " (storeOnClickListenerInvokeStmt): " + methods.size(), true);
-            try {
-                SootMethod onClickMethod = methodClass.getMethodByName(Constants.ONCLICK);
-                if (onClickMethod.hasActiveBody()) {
-                    this.logWriter.write(LogType.OUT, "Found onClick, and it has an active body.", true);
-                    // this.logWriter.writeOut(onClickMethod.getActiveBody().toString());
-                } else {
-                    this.logWriter.write(LogType.ERR, "Found onClick, but it has no active body.", true);
-                }
-            } catch (RuntimeException rte) {
-                if (Constants.PRINT_ST) {
-                    rte.printStackTrace();
-                }
-                this.logWriter.write(LogType.ERR, "Did not find onClick in class " + methodClass.getName() + ".", true);
-                this.logWriter.write(LogType.ERR, "\t" + rte.getMessage(), true);
-            }
-            this.onClickListeners.add(methodClass);
-
-        }
-    }
-
 
     /**
      * store unlabeled edges that go from one activity to another
@@ -209,13 +112,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
         if(stmt.containsInvokeExpr()) {
-            if(this.passNumber == 1) {
-                storeGraphEdges(stmt);
-                storeOnClickListenerInvokeStmt(stmt);
-            }
-            else {
-                getUIElement(stmt);
-            }
+            storeGraphEdges(stmt);
         }
     }
 }

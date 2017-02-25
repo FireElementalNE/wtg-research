@@ -1,6 +1,4 @@
 #!/bin/bash
-rm -rf sootOutput *.log
-rm -rf src/*.class
 
 # defaults
 DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"
@@ -9,14 +7,22 @@ SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
 DEFAULT_MEM="8196M"
 
+clean() {
+  rm -rf sootOutput 
+  rm -rf src/*.class src/androidgraph/*.class *.log
+  rm -rf graph_generator/*.dot graph_generator/*.svg
+  rm -rf graph_generator/*.pyc graph_generator/globals/*.pyc
+}
+
 usage() { 
   printf "Usage: $0 [-v] [-t <ANDROID APK>] [-m <MEMORY>]\n" 1>&2 
   printf "\t-v shows soot's (very) verbose output\n" 1>&2
   printf "\t-t <ANDROID APK> sets the target apk\n" 1>&2
   printf "\t-m <MEMORY> sets the max java memory (-Xmx)\n" 1>&2
+  printf "\t-c clean up dirs\n" 1>&2
   exit 1
 }
-while getopts ":t:vm:" opt; do
+while getopts ":t:vcm:" opt; do
   case $opt in
     v)
       VERBOSE=1
@@ -27,11 +33,17 @@ while getopts ":t:vm:" opt; do
     m)
       MAX_MEM="$OPTARG"
       ;;
+    c)
+      clean
+      exit
+      ;;
     \?)
-	  usage
-	  ;;
+      usage
+      ;;
   esac
 done
+
+clean
 
 # set memory and pretty print
 if [ $MAX_MEM ] ; then
@@ -71,3 +83,6 @@ else
     printf "Runtime........%s seconds\n" $RUNTIME
 fi
 
+# printf "Generating Graph..."
+# python graph_generator/gen_graph.py -i InferenceTransformer_logfile.log
+# printf "Done."
