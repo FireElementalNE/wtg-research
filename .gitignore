@@ -20,3 +20,5 @@ docs/soot/*
 *.dot
 *.pyc
 *.svg
+
+*.tgz
