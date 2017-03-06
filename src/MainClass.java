@@ -1,13 +1,48 @@
+import android.content.res.AXmlResourceParser;
+import org.xmlpull.v1.XmlPullParser;
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
+import test.AXMLPrinter;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
 public class MainClass {
+    private static String getStringFromInputStream(InputStream is) {
+
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return sb.toString();
+
+    }
 
     public static void main(String[] args) {
         // TODO: see list
@@ -65,6 +100,63 @@ public class MainClass {
         };
         List<String> exclude = new ArrayList<String>(Arrays.asList(excludes));
         Options.v().set_exclude(exclude);
+
+        String apk_file = "";
+        for(int i = 0; i < args.length; i++) {
+            if(args[i].contains("-process-dir")) {
+                apk_file = args[i+1];
+            }
+        }
+        // TODO: expand this, thanks internet and Scene.java!
+
+        // get AndroidManifest
+        File apkF = new File(apk_file);
+        InputStream manifestIS = null;
+        ZipFile archive = null;
+        try {
+            archive = new ZipFile(apkF);
+            for (@SuppressWarnings("rawtypes") Enumeration entries = archive.entries(); entries.hasMoreElements(); ) {
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+                String entryName = entry.getName();
+                // We are dealing with the Android manifest
+                if (entryName.equals("AndroidManifest.xml")) {
+                    manifestIS = archive.getInputStream(entry);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error when looking for manifest in apk: " + e);
+        }
+        try {
+            AXmlResourceParser parser = new AXmlResourceParser();
+            parser.open(manifestIS);
+            while (true) {
+                int type = parser.next();
+                if (type == XmlPullParser.END_DOCUMENT) {
+                    // throw new RuntimeException
+                    // ("target sdk version not found in Android manifest ("+
+                    // apkF +")");
+                    break;
+                }
+                switch (type) {
+                    case XmlPullParser.START_DOCUMENT: {
+
+                        break;
+                    }
+                    case XmlPullParser.START_TAG: {
+                        String tagName = parser.getName();
+                        System.out.println(tagName);
+                        break;
+                    }
+                    case XmlPullParser.END_TAG:
+                        break;
+                    case XmlPullParser.TEXT:
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         // TODO: Need to make a couple of passes here to find out the type of call graph
