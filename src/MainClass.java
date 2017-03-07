@@ -1,17 +1,10 @@
-import android.content.res.AXmlResourceParser;
-import org.xmlpull.v1.XmlPullParser;
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
-import test.AXMLPrinter;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 
 public class MainClass {
@@ -79,56 +72,12 @@ public class MainClass {
                 apk_file = args[i+1];
             }
         }
-        // TODO: expand this, thanks internet and Scene.java!
-
-        // get AndroidManifest
-        File apkF = new File(apk_file);
-        InputStream manifestIS = null;
-        ZipFile archive = null;
-        try {
-            archive = new ZipFile(apkF);
-            for (@SuppressWarnings("rawtypes") Enumeration entries = archive.entries(); entries.hasMoreElements(); ) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-                String entryName = entry.getName();
-                // We are dealing with the Android manifest
-                if (entryName.equals("AndroidManifest.xml")) {
-                    manifestIS = archive.getInputStream(entry);
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error when looking for manifest in apk: " + e);
+        AndroidXMLUtility androidXMLUtility = new AndroidXMLUtility(apk_file);
+        List<String> xml_files = androidXMLUtility.get_xml_names();
+        for(String s : xml_files) {
+            androidXMLUtility.parse_xml_file(s);
         }
-        try {
-            AXmlResourceParser parser = new AXmlResourceParser();
-            parser.open(manifestIS);
-            while (true) {
-                int type = parser.next();
-                if (type == XmlPullParser.END_DOCUMENT) {
-                    // throw new RuntimeException
-                    // ("target sdk version not found in Android manifest ("+
-                    // apkF +")");
-                    break;
-                }
-                switch (type) {
-                    case XmlPullParser.START_DOCUMENT: {
 
-                        break;
-                    }
-                    case XmlPullParser.START_TAG: {
-                        String tagName = parser.getName();
-                        System.out.println(tagName);
-                        break;
-                    }
-                    case XmlPullParser.END_TAG:
-                        break;
-                    case XmlPullParser.TEXT:
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         // TODO: Need to make a couple of passes here to find out the type of call graph
