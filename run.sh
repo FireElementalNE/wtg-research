@@ -1,17 +1,19 @@
 #!/bin/bash
 
 # defaults
-DEFAULT_JAR="test_program/credgen/CredGen_Final.apk"
+DEFAULT_APK="test_program/credgen/CredGen_Final.apk"
 JAVA_LIBS=`find ./classpath_includes/ -name '*.jar' | xargs | sed 's/ /:/g'`
 SOOT_TRUNK="src:classpath_includes/soot-trunk.jar"
 MAIN_CLASS="src/MainClass.java"
 DEFAULT_MEM="8196M"
+APK_TOOL="./apktool.jar"
 
 clean() {
   rm -rf sootOutput 
   rm -rf src/*.class src/androidgraph/*.class *.log
   rm -rf graph_generator/*.dot graph_generator/*.svg
   rm -rf graph_generator/*.pyc graph_generator/globals/*.pyc
+  rm -rf APK_UNPACK
 }
 
 usage() { 
@@ -28,7 +30,7 @@ while getopts ":t:vcm:" opt; do
       VERBOSE=1
       ;;
     t)
-	  TARGET_JAR="$OPTARG"
+	  TARGET_APK="$OPTARG"
 	  ;;
     m)
       MAX_MEM="$OPTARG"
@@ -44,22 +46,28 @@ while getopts ":t:vcm:" opt; do
 done
 
 clean
-
+printf "Running apktool..."
+if [ $VERBOSE ] ; then
+    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK
+else
+    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK &>/dev/null
+fi
+printf "Done.\n"
 # set memory and pretty print
 if [ $MAX_MEM ] ; then
     DEFAULT_MEM="$MAX_MEM"
 fi
-printf "Max Memory.....%s\n" $DEFAULT_MEM
+printf "Max Memory........%s\n" $DEFAULT_MEM
 
 # set target and pretty print
-if [ $TARGET_JAR ] ; then
-    DEFAULT_JAR="$TARGET_JAR"
+if [ $TARGET_APK ] ; then
+    DEFAULT_APK="$TARGET_JAR"
 fi
-printf "Targeting......%s\n" $DEFAULT_JAR
+printf "Targeting.........%s\n" $DEFAULT_APK
 
 # pretty print compilation and compile
 javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/"
-printf "Compilation...."
+printf "Compilation......."
 if [ $? != 0 ] ; then
     printf "failed\n"
     exit $?
@@ -68,21 +76,17 @@ else
 fi
 
 # The lolz: https://mailman.cs.mcgill.ca/pipermail/soot-list/2015-June/008074.html
-printf "Verbose........"
+printf "Verbose..........."
 if [ $VERBOSE ] ; then
     printf "enabled\n"
-	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR
+	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_APK
 else
     printf "disabled\n"
 	start=`date +%s`
-	printf "Running Soot..."
-	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_JAR &>/dev/null
+	printf "Running Soot......"
+	java "-Xmx$DEFAULT_MEM" -classpath $SOOT_TRUNK MainClass --soot-class-path $JAVA_LIBS -process-dir $DEFAULT_APK &>/dev/null
     printf "Done\n"
     end=`date +%s`
     RUNTIME=$((end-start))
-    printf "Runtime........%s seconds\n" $RUNTIME
+    printf "Runtime...........%s seconds\n" $RUNTIME
 fi
-
-# printf "Generating Graph..."
-# python graph_generator/gen_graph.py -i InferenceTransformer_logfile.log
-# printf "Done."

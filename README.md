@@ -66,7 +66,8 @@ Usage: ./run.sh [-v] [-t <ANDROID APK>] [-m <MEMORY>] [-c]
 * Java JDK (you need javac)
 * All of the classes that will be analyzed (anything not explicitly given  
   will be treated as a phantom-ref!)  
-* [**Graphviz**](http://www.graphviz.org/) (this is available for most Linux distributions)
+* [**Graphviz**](http://www.graphviz.org/) (this is available for most Linux distributions)  
+* [**APK tool**](https://ibotpeaches.github.io/Apktool/documentation/)
 
 # Notes
 * The original WTG paper can be found [**here**](http://dacongy.github.io/papers/yang-ase15.pdf).
