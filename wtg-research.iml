@@ -7,9 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="classpath_includes" level="project" />
-    <orderEntry type="library" name="soot-trunk" level="project" />
     <orderEntry type="library" name="android" level="project" />
+    <orderEntry type="library" name="classpath_includes" level="project" />
     <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

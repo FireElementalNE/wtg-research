@@ -15,6 +15,8 @@ public class Constants {
     final static String ON_CLICK_LISTENER_CLASS = "android.view.ViewOnClickListener";
     final static String JAVA_CLASS_CLASS = "java.lang.Class";
 
+    final static String APK_UNPACK_PREFIX = "APK_UNPACK/";
+
     final static String LOG_SUFFIX = "_logfile.log";
 
     final static String OUT_TAG = "OUT";

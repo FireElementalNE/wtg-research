@@ -20,5 +20,6 @@ docs/soot/*
 *.dot
 *.pyc
 *.svg
-
 *.tgz
+APK_UNPACK/*
+apktool.jar

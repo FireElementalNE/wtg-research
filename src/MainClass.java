@@ -77,7 +77,6 @@ public class MainClass {
         for(String s : xml_files) {
             androidXMLUtility.parse_xml_file(s);
         }
-
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         // TODO: Need to make a couple of passes here to find out the type of call graph

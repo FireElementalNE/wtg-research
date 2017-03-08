@@ -36,53 +36,14 @@ public class AndroidXMLUtility {
      * @param filename the filename (and path) of the XML file within the APK
      */
     public void parse_xml_file(String filename) {
-        InputStream xml_input_stream = get_input_stream(filename);
-        StringBuilder sb = new StringBuilder();
-        if(xml_input_stream != null) {
-                int i;
-                char c;
-            try {
-                // TODO: Fix this, incorrect encoding (I am JUST trying to get it to print!!!!)
-                while((i = xml_input_stream.read())!=-1) {
-                    c = (char)i;
-                    sb.append(c);
-                }
-                this.logWriter.write(LogType.OUT, sb.toString(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        String true_filename = Constants.APK_UNPACK_PREFIX + filename;
+        File in_file = new File(true_filename);
+        if(in_file.exists()) {
+            this.logWriter.write(LogType.OUT, true_filename + " Exists!", false);
         }
         else {
-            this.logWriter.write(LogType.ERR, filename + ": failed to retreive input stream", false);
+            this.logWriter.write(LogType.OUT, true_filename + " does NOT exist!", false);
         }
-    }
-
-    /**
-     * get an input stream from a file in the APK
-     * @param filename the filename in the APK
-     * @return an input stream to that file
-     */
-    private InputStream get_input_stream(String filename) {
-        InputStream is = null;
-        // get AndroidManifest
-        File apkF = new File(this.apk_path);
-        ZipFile archive = null;
-        try {
-            archive = new ZipFile(apkF);
-            Enumeration entries = archive.entries();
-            while(entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-                String entryName = entry.getName();
-                if(Objects.equals(filename, entryName)) {
-                    is = archive.getInputStream(entry);
-                    return is;
-                }
-
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error when looking for xml file input stream  in apk: " + e);
-        }
-        return is;
     }
 
     /**
