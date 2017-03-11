@@ -1,7 +1,6 @@
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
-import sun.reflect.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
