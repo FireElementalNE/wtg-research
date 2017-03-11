@@ -1,6 +1,7 @@
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
+import sun.reflect.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,11 +73,14 @@ public class MainClass {
                 apk_file = args[i+1];
             }
         }
+
         AndroidXMLUtility androidXMLUtility = new AndroidXMLUtility(apk_file);
         List<String> xml_files = androidXMLUtility.get_xml_names();
         for(String s : xml_files) {
             androidXMLUtility.parse_xml_file(s);
         }
+        androidXMLUtility.write_elements();
+
         InferenceTransformer infTrans = new InferenceTransformer();
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         // TODO: Need to make a couple of passes here to find out the type of call graph

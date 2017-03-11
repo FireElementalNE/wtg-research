@@ -1,10 +1,15 @@
+import org.w3c.dom.*;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -16,11 +21,22 @@ public class AndroidXMLUtility {
     private LogWriter logWriter;
 
     /**
+     * get the AndroidUIElements from the XML parse
+     * @return the AndroidUIElements
+     */
+    public List<AndroidUIElement> getAndroidUIElements() {
+        return androidUIElements;
+    }
+
+    private List<AndroidUIElement> androidUIElements;
+    /**
      * Constructor for the AndroidXMLUtility
      * @param apk the file path for the APK
      */
     public AndroidXMLUtility(String apk) {
         this.apk_path = apk;
+        this.androidUIElements = new ArrayList<>();
+
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
@@ -35,14 +51,55 @@ public class AndroidXMLUtility {
      * parse a given XML file in the apk
      * @param filename the filename (and path) of the XML file within the APK
      */
-    public void parse_xml_file(String filename) {
+    public void parse_xml_file(String filename)  {
+        String[] s = this.apk_path.split("/");
+        for(String s1 : s) {
+            logWriter.write(LogType.OUT, s1, false);
+        }
         String true_filename = Constants.APK_UNPACK_PREFIX + filename;
         File in_file = new File(true_filename);
         if(in_file.exists()) {
-            this.logWriter.write(LogType.OUT, true_filename + " Exists!", false);
+            try {
+                this.logWriter.write(LogType.OUT, true_filename + " Exists!", false);
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder;
+                builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(in_file);
+                Element root = doc.getDocumentElement();
+                NodeList root_children = root.getChildNodes();
+                for(int i = 0; i < root_children.getLength(); i++) {
+                    org.w3c.dom.Node aNode = root_children.item(i);
+                    if(aNode.hasAttributes()) {
+                        // TODO: deal with radio buttons (nodes with children)
+                        String ui_type = aNode.getNodeName();
+                        NamedNodeMap bNode = aNode.getAttributes();
+                        for(int j = 0; j < bNode.getLength(); j++) {
+                            Node cNode = bNode.item(j);
+                            if(cNode.getNodeName().equals(Constants.XML_ID_TAG)) {
+                                this.androidUIElements.add(new AndroidUIElement(cNode.getNodeValue(), ui_type, filename));
+                            }
+                        }
+                    }
+                }
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                System.err.println(this.getClass().getSimpleName() + ": Declaring LogWriter Failed");
+                if(Constants.PRINT_ST) {
+                    e.printStackTrace();
+                }
+            }
+
         }
         else {
             this.logWriter.write(LogType.OUT, true_filename + " does NOT exist!", false);
+        }
+    }
+
+    /**
+     * write the ui elements to the log file
+     */
+    public void write_elements() {
+        for(AndroidUIElement androidUIElement : this.androidUIElements) {
+            this.logWriter.write(LogType.OUT, androidUIElement.toString(), false);
         }
     }
 
