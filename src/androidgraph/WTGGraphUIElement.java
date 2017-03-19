@@ -1,6 +1,5 @@
 package androidgraph;
 
-import soot.SootClass;
 import soot.SootMethod;
 
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.HashMap;
  */
 public class WTGGraphUIElement {
     private String element_name;
-    private SootClass element_class;
+    private String element_class;
     private HashMap<String, SootMethod> listeners;
     private HashMap<String, SootMethod> callbacks;
 
@@ -19,7 +18,7 @@ public class WTGGraphUIElement {
      * @param name the variable (or local) name of the ui element
      * @param view_class the ui element class (Button, RadioButton ect)
      */
-    public WTGGraphUIElement(String name, SootClass view_class) {
+    public WTGGraphUIElement(String name, String view_class) {
         this.element_name = name;
         this.element_class = view_class;
         this.listeners = new HashMap<>();
@@ -40,7 +39,7 @@ public class WTGGraphUIElement {
      *
      * @return the element class
      */
-    public SootClass get_element_class() {
+    public String get_element_class() {
         return this.element_class;
     }
 

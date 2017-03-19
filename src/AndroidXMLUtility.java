@@ -40,7 +40,7 @@ public class AndroidXMLUtility {
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
-            System.err.println(this.getClass().getSimpleName() + ": Declaring LogWriter Failed");
+            System.err.println("AndroidXMLUtility: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {
                 e.printStackTrace();
             }
@@ -82,7 +82,7 @@ public class AndroidXMLUtility {
                     }
                 }
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                System.err.println(this.getClass().getSimpleName() + ": Declaring LogWriter Failed");
+                System.err.println("AndroidXMLUtility: Parsing XML " + filename + " failed.");
                 if(Constants.PRINT_ST) {
                     e.printStackTrace();
                 }
@@ -109,22 +109,24 @@ public class AndroidXMLUtility {
      */
     public List<String> get_xml_names() {
         List <String> names = new ArrayList<>();
-        // get AndroidManifest
         File apkF = new File(this.apk_path);
-        ZipFile archive = null;
+        ZipFile archive;
         try {
             archive = new ZipFile(apkF);
             Enumeration entries = archive.entries();
-            while(entries.hasMoreElements()) {
+            while (entries.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) entries.nextElement();
                 String entryName = entry.getName();
-                if(Constants.XML_FILENAME.matcher(entryName).find() &&
+                if (Constants.XML_FILENAME.matcher(entryName).find() &&
                         !Constants.XML_EXCLUDES.contains(entryName)) {
                     names.add(entryName);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Error when looking for xml file names in apk: " + e);
+        } catch (IOException e) {
+            System.err.println("AndroidXMLUtility: Getting XML names failed.");
+            if(Constants.PRINT_ST) {
+                e.printStackTrace();
+            }
         }
         return names;
     }

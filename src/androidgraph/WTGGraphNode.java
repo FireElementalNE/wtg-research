@@ -1,6 +1,7 @@
 package androidgraph;
 
 import soot.SootClass;
+import soot.SootMethod;
 
 import java.util.HashMap;
 
@@ -10,17 +11,19 @@ import java.util.HashMap;
 public class WTGGraphNode {
     private String activity_name;
     private SootClass activity_class;
+    private SootMethod on_create_method;
     private HashMap<String, WTGGraphUIElement> ui_elements;
 
     /**
      * constructor to create a new Node for the graph
-     *
-     * @param name       the name of the activity
+     * @param name the name of the activity
      * @param soot_class the class instance of the activity
+     * @param on_create_method the onCreate() method of the activity
      */
-    public WTGGraphNode(String name, SootClass soot_class) {
+    public WTGGraphNode(String name, SootClass soot_class, SootMethod on_create_method) {
         this.activity_name = name;
         this.activity_class = soot_class;
+        this.on_create_method = on_create_method;
         this.ui_elements = new HashMap<>();
     }
 
@@ -60,10 +63,28 @@ public class WTGGraphNode {
      * add a WTGGraphUIElement to the ui_elements HashMap
      *
      * @param name       the name of the WTGGraphUIElement
-     * @param soot_class the class of the WTGGraphUIElement
+     * @param view_class the class of the WTGGraphUIElement
      */
-    public void add_ui_element(String name, SootClass soot_class) {
-        this.ui_elements.put(name, new WTGGraphUIElement(name, soot_class));
+    public void add_ui_element(String name, String view_class) {
+        this.ui_elements.put(name, new WTGGraphUIElement(name, view_class));
     }
 
+    /**
+     * get the onCreate() method of the activity
+     * @return the onCreate method of the activity
+     */
+    public SootMethod getOn_create_method() {
+        return on_create_method;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.activity_name);
+        sb.append(" => ");
+        for(HashMap.Entry<String, WTGGraphUIElement> entry: this.ui_elements.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append(" ");
+        }
+        return sb.toString();
+    }
 }

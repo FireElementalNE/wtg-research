@@ -1,6 +1,5 @@
 import androidgraph.WTGGraphNode;
 import soot.*;
-import soot.util.Chain;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,8 +38,26 @@ class InferenceTransformer extends BodyTransformer {
         if(methodClass.hasSuperclass() && method.isConstructor()) {
             if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
                 if (!Utilities.androidSkip(methodClass)) {
-                    this.graph_nodes.add(new WTGGraphNode(methodClass.getName(), methodClass));
-                    return true;
+                    try {
+                        SootMethod on_create = methodClass.getMethodByName(Constants.ON_CREATE_METHOD_NAME);
+                        WTGGraphNode wtgGraphNode = new WTGGraphNode(methodClass.getName(), methodClass, on_create);
+                        for (SootField sootField : methodClass.getFields()) {
+                            String field_type = sootField.getType().toString();
+                            String local = sootField.getName();
+                            if (Constants.WIDGET_CHECK.matcher(field_type).find()) {
+                                wtgGraphNode.add_ui_element(local, field_type);
+                            }
+                        }
+                        this.logWriter.write(LogType.OUT, wtgGraphNode.toString(), false);
+                        this.graph_nodes.add(wtgGraphNode);
+                        return true;
+                    } catch (RuntimeException e) {
+                        System.err.println("InferenceTransformer: could not find onClick() method");
+                        if(Constants.PRINT_ST) {
+                            e.printStackTrace();
+                        }
+                        return false;
+                    }
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
                     this.logWriter.write(LogType.OUT, msg, true);

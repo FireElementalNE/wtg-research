@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 public class Constants {
     final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
+    final static String ON_CREATE_METHOD_NAME = "onCreate";
     final static String ACTIVITY_SUPERCLASS = "android.app.Activity";
     final static String SET_ONCLICK_LISTNER = "setOnClickListener";
     final static String ONCLICK = "onClick";
@@ -31,7 +32,7 @@ public class Constants {
     final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
     final static Pattern TARGET_INVOKE_LINE = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
     final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
-
+    final static Pattern WIDGET_CHECK = Pattern.compile("^android\\.widget\\.(.*)$");
 
     final static boolean PRINT_ST = true;
     final static boolean DEBUG = false;
