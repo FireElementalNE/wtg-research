@@ -39,7 +39,9 @@ class InferenceTransformer extends BodyTransformer {
             if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
                 if (!Utilities.androidSkip(methodClass)) {
                     try {
+                        // find the onCreate method
                         SootMethod on_create = methodClass.getMethodByName(Constants.ON_CREATE_METHOD_NAME);
+                        // gets the fields of the activity
                         WTGGraphNode wtgGraphNode = new WTGGraphNode(methodClass.getName(), methodClass, on_create);
                         for (SootField sootField : methodClass.getFields()) {
                             String field_type = sootField.getType().toString();

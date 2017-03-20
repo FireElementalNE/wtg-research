@@ -47,6 +47,21 @@ public class AndroidXMLUtility {
         }
     }
 
+    private void parse_node_element(Node node, String filename) {
+        if(node.hasAttributes()) {
+            String ui_type = node.getNodeName();
+            this.logWriter.write(LogType.OUT, "---->" + ui_type,false);
+            NamedNodeMap node_child_attrs = node.getAttributes();
+            for(int j = 0; j < node_child_attrs.getLength(); j++) {
+                Node child_attrs = node_child_attrs.item(j);
+                if(child_attrs.getNodeName().equals(Constants.XML_ID_TAG)) {
+                    this.logWriter.write(LogType.OUT, "---->" + child_attrs.getNodeValue(),false);
+                    this.androidUIElements.add(new AndroidUIElement(child_attrs.getNodeValue(), ui_type, filename));
+                }
+            }
+        }
+    }
+
     /**
      * parse a given XML file in the apk
      * @param filename the filename (and path) of the XML file within the APK
@@ -68,18 +83,17 @@ public class AndroidXMLUtility {
                 Element root = doc.getDocumentElement();
                 NodeList root_children = root.getChildNodes();
                 for(int i = 0; i < root_children.getLength(); i++) {
-                    org.w3c.dom.Node aNode = root_children.item(i);
-                    if(aNode.hasAttributes()) {
-                        // TODO: deal with radio buttons (nodes with children)
-                        String ui_type = aNode.getNodeName();
-                        NamedNodeMap bNode = aNode.getAttributes();
-                        for(int j = 0; j < bNode.getLength(); j++) {
-                            Node cNode = bNode.item(j);
-                            if(cNode.getNodeName().equals(Constants.XML_ID_TAG)) {
-                                this.androidUIElements.add(new AndroidUIElement(cNode.getNodeValue(), ui_type, filename));
-                            }
-                        }
-                    }
+                    Node root_child = root_children.item(i);
+//                    if(root_child.hasChildNodes()) {
+//                        NodeList root_grandchildren = root_child.getChildNodes();
+//                        for(int j = 0; j < root_grandchildren.getLength(); j++) {
+//                           Node root_grandchild = root_grandchildren.item(i);
+//                           parse_node_element(root_grandchild, filename);
+//                        }
+//                    }
+//                    else {
+                    parse_node_element(root_child, filename);
+                    // }
                 }
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 System.err.println("AndroidXMLUtility: Parsing XML " + filename + " failed.");
