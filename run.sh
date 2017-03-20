@@ -13,7 +13,7 @@ clean() {
   rm -rf src/*.class src/androidgraph/*.class *.log
   rm -rf graph_generator/*.dot graph_generator/*.svg
   rm -rf graph_generator/*.pyc graph_generator/globals/*.pyc
-  # rm -rf APK_UNPACK
+  rm -rf APK_UNPACK
 }
 
 usage() { 
@@ -47,17 +47,17 @@ done
 
 clean
 
-# if [ $VERBOSE ] ; then
-#     java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK
-# else
-#     printf "Running apktool..."
-#     start=`date +%s`
-#     java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK &>/dev/null
-#     end=`date +%s`
-#     APK_TOOL_RUNTIME=$((end-start))
-#     printf "Done.\n"
-#     printf "apktool runtime...%s seconds\n" $APK_TOOL_RUNTIME
-# fi
+if [ $VERBOSE ] ; then
+    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK
+else
+    printf "Running apktool..."
+    start=`date +%s`
+    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK &>/dev/null
+    end=`date +%s`
+    APK_TOOL_RUNTIME=$((end-start))
+    printf "Done.\n"
+    printf "apktool runtime...%s seconds\n" $APK_TOOL_RUNTIME
+fi
 
 # set memory and pretty print
 if [ $MAX_MEM ] ; then

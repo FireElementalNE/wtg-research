@@ -36,7 +36,6 @@ public class AndroidXMLUtility {
     public AndroidXMLUtility(String apk) {
         this.apk_path = apk;
         this.androidUIElements = new ArrayList<>();
-
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
@@ -47,7 +46,13 @@ public class AndroidXMLUtility {
         }
     }
 
+    /**
+     * parse a single element
+     * @param node the element
+     * @param filename the filename that the element was found in
+     */
     private void parse_node_element(Node node, String filename) {
+        // TODO: find nested elements by using recursion and starting with root
         if(node.hasAttributes()) {
             String ui_type = node.getNodeName();
             this.logWriter.write(LogType.OUT, "---->" + ui_type,false);
@@ -83,17 +88,9 @@ public class AndroidXMLUtility {
                 Element root = doc.getDocumentElement();
                 NodeList root_children = root.getChildNodes();
                 for(int i = 0; i < root_children.getLength(); i++) {
+                    // TODO: only handles first level children have to recurse to all children
                     Node root_child = root_children.item(i);
-//                    if(root_child.hasChildNodes()) {
-//                        NodeList root_grandchildren = root_child.getChildNodes();
-//                        for(int j = 0; j < root_grandchildren.getLength(); j++) {
-//                           Node root_grandchild = root_grandchildren.item(i);
-//                           parse_node_element(root_grandchild, filename);
-//                        }
-//                    }
-//                    else {
                     parse_node_element(root_child, filename);
-                    // }
                 }
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 System.err.println("AndroidXMLUtility: Parsing XML " + filename + " failed.");
