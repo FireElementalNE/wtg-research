@@ -47,22 +47,28 @@ public class AndroidXMLUtility {
     }
 
     /**
-     * parse a single element
+     * parse a single element and all of its children recursivly
      * @param node the element
      * @param filename the filename that the element was found in
      */
     private void parse_node_element(Node node, String filename) {
-        // TODO: find nested elements by using recursion and starting with root
         if(node.hasAttributes()) {
             String ui_type = node.getNodeName();
-            this.logWriter.write(LogType.OUT, "---->" + ui_type,false);
             NamedNodeMap node_child_attrs = node.getAttributes();
             for(int j = 0; j < node_child_attrs.getLength(); j++) {
                 Node child_attrs = node_child_attrs.item(j);
                 if(child_attrs.getNodeName().equals(Constants.XML_ID_TAG)) {
-                    this.logWriter.write(LogType.OUT, "---->" + child_attrs.getNodeValue(),false);
+                    String msg = String.format("%s is %s (%s)", child_attrs.getNodeValue(), ui_type, filename);
+                    this.logWriter.write(LogType.OUT, msg, false);
                     this.androidUIElements.add(new AndroidUIElement(child_attrs.getNodeValue(), ui_type, filename));
                 }
+            }
+        }
+        if(node.hasChildNodes()) {
+            NodeList children = node.getChildNodes();
+            for(int i = 0; i < children.getLength(); i++) {
+                Node next = children.item(i);
+                parse_node_element(next, filename);
             }
         }
     }

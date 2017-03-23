@@ -50,7 +50,7 @@ class InferenceTransformer extends BodyTransformer {
                                 wtgGraphNode.add_ui_element(local, field_type);
                             }
                         }
-                        this.logWriter.write(LogType.OUT, wtgGraphNode.toString(), false);
+                        this.logWriter.write(LogType.OUT, wtgGraphNode.toString(), true);
                         this.graph_nodes.add(wtgGraphNode);
                         return true;
                     } catch (RuntimeException e) {
