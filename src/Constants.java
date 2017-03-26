@@ -24,6 +24,8 @@ public class Constants {
     final static String ERR_TAG = "ERR";
     final static String SCR_TAG = "SCR";
 
+    final static String FIND_VIEW_BY_ID_METHOD = "findViewById";
+
     final static String NOPARSE = "NOPARSE";
 
     final static String INTENT_CLASS = "android.content.Intent";

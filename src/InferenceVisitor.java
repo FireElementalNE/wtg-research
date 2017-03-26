@@ -92,11 +92,13 @@ class InferenceVisitor extends AbstractStmtSwitch {
     private void storeGraphEdges(InvokeStmt stmt) {
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
+        // this.logWriter.write(LogType.OUT, "outer if -> " + stmt.getInvokeExpr().getMethod().getName(), true);
         if(method.isConstructor()
                 && method.getParameterCount() == 2
                 && method.getParameterType(0).toString().equals(Constants.CONTEXT_CLASS)
                 && method.getParameterType(1).toString().contains(Constants.JAVA_CLASS_CLASS)
                 && methodClass.getName().equals(Constants.INTENT_CLASS)) {
+            // this.logWriter.write(LogType.OUT, "inner if -> " + stmt.getInvokeExpr().getMethod().getName(), true);
             ValueBox valueBox = stmt.getInvokeExprBox();
             Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
             if(matcher.find()) {
@@ -106,7 +108,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
     }
 
     /**
-     * Overidden statement to catch invoke statements
+     * statement to catch invoke statements from AbstractStmtSwitch
      * @param stmt the current invoke statement
      */
     @Override
@@ -115,4 +117,26 @@ class InferenceVisitor extends AbstractStmtSwitch {
             storeGraphEdges(stmt);
         }
     }
+
+    /**
+     * statement to catch assignment statements from AbstractStmtSwitch
+     * @param stmt the current assignment statement
+     */
+    @Override
+    public void caseAssignStmt(AssignStmt stmt) {
+        if(stmt.containsInvokeExpr()) {
+            InvokeExpr invokeExpr = stmt.getInvokeExpr();
+            SootMethod sootMethod = invokeExpr.getMethod();
+            // find all of the calls to findViewById() that get assigned to something
+            if(sootMethod.getName().equals(Constants.FIND_VIEW_BY_ID_METHOD)) {
+                String left_type = stmt.getLeftOp().getType().toString();
+                String right_type = stmt.getRightOp().getType().toString();
+                String left_value = stmt.getLeftOpBox().getValue().toString();
+                String right_value = stmt.getRightOpBox().getValue().toString();
+                String msg = String.format("Assignment -> %s, %s  %s, %s", left_type, right_type, left_value, right_value);
+                this.logWriter.write(LogType.OUT, msg, true);
+            }
+        }
+    }
 }
+

@@ -72,18 +72,21 @@ public class MainClass {
                 apk_file = args[i+1];
             }
         }
-
+        Options.v().set_whole_program(true);
         AndroidXMLUtility androidXMLUtility = new AndroidXMLUtility(apk_file);
         List<String> xml_files = androidXMLUtility.get_xml_names();
         for(String s : xml_files) {
             androidXMLUtility.parse_xml_file(s);
         }
         androidXMLUtility.write_elements();
-
         InferenceTransformer infTrans = new InferenceTransformer();
+        /**
+         * TODO
+         * Maybe use wjtp for whole program analysis so we can get that pesky sootOutput/com.credgenfixed.R$id.jimple
+         * this will allows us to map declared UI elements in the XML to ones found in the program (there is a
+         * unique string)
+         */
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
-        // TODO: Need to make a couple of passes here to find out the type of call graph
-        // TODO: is being generated.
         soot.Main.main(args);
         infTrans.printAll();
     }
