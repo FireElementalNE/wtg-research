@@ -87,4 +87,28 @@ public class WTGGraphNode {
         }
         return sb.toString();
     }
+
+    /**
+     * get counts for each UI type
+     * @return a hashmap with the key being the class and the value being the number
+     * of times that class is declared in this Node
+     */
+    public HashMap<String, Integer> get_counts() {
+        HashMap<String, Integer> ret_val = new HashMap<>();
+        for(HashMap.Entry<String, WTGGraphUIElement> entry : this.ui_elements.entrySet()) {
+            String classname = entry.getValue().get_element_class();
+            if(ret_val.containsKey(classname)) {
+                ret_val.replace(classname, ret_val.get(classname) + 1);
+            }
+            else {
+                ret_val.put(classname, 1);
+            }
+        }
+        return ret_val;
+    }
+
+
+
+
+
 }

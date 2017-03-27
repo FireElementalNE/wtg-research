@@ -123,6 +123,19 @@ class InferenceTransformer extends BodyTransformer {
     }
 
     /**
+     * prints ui elements (with activity name and counts)
+     */
+    public void print_ui_elements() {
+        for(WTGGraphNode wtgGraphNode : this.graph_nodes) {
+            this.logWriter.write(LogType.SCR, wtgGraphNode.get_activity_name(), true);
+            HashMap<String, Integer> counts = wtgGraphNode.get_counts();
+            for(HashMap.Entry<String, Integer> entry : counts.entrySet()) {
+                this.logWriter.write(LogType.SCR, String.format("\t%s: %d", entry.getKey(), entry.getValue()), true);
+            }
+        }
+    }
+
+    /**
      *  Print everything
      */
     void printAll() {

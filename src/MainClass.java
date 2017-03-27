@@ -89,6 +89,7 @@ public class MainClass {
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
         soot.Main.main(args);
         infTrans.printAll();
+        infTrans.print_ui_elements();
     }
 
     private static Local addTmpRef(Body body)
