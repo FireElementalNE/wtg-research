@@ -1,6 +1,7 @@
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
+import soot.util.Chain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,7 @@ public class MainClass {
         }
         androidXMLUtility.write_elements();
         InferenceTransformer infTrans = new InferenceTransformer();
+
         /**
          * TODO
          * Maybe use wjtp for whole program analysis so we can get that pesky sootOutput/com.credgenfixed.R$id.jimple
@@ -87,7 +89,10 @@ public class MainClass {
          * unique string)
          */
         PackManager.v().getPack("jtp").add(new Transform("jtp.myInstrumenter1", infTrans));
+
         soot.Main.main(args);
+        // TODO: this is how you can all classes. this will help u get com.credgenfixed.R$id
+        // Chain<SootClass> sootClassChain = Scene.v().getClasses();
         infTrans.printAll();
         infTrans.print_ui_elements();
     }
