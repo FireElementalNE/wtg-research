@@ -10,24 +10,14 @@ import java.util.regex.Matcher;
 
 class InferenceVisitor extends AbstractStmtSwitch {
     private LogWriter logWriter;
-    Map<String, List<String>> edges;
-    private SootClass activity_class;
-    private List<WTGGraphNode> graph_nodes;
-    private int pass_number;
-
+    public List<WTGGraphEdge> edges;
     /**
-     * Constructor for first pass
-     * @param pass_number the pass number
-     * @param activityclass the activity class
-     * @param graph_nodes the current list of WTGGraphNodes
+     * Constructor Visitor
      */
-    InferenceVisitor(SootClass activityclass, List<WTGGraphNode> graph_nodes, int pass_number) {
-        this.edges = new HashMap<>();
-        this.pass_number = pass_number;
-        this.activity_class = activityclass;
-        this.graph_nodes = graph_nodes;
+    InferenceVisitor() {
+        this.edges = new ArrayList<>();
         try {
-            this.logWriter = new LogWriter(this.getClass().getSimpleName(), pass_number);
+            this.logWriter = new LogWriter(this.getClass().getSimpleName());
         } catch (IOException e) {
             System.err.println("InferenceVisitor: Declaring LogWriter Failed");
             if(Constants.PRINT_ST) {
@@ -42,7 +32,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
      * @param callee the class that is being called through an intent
      * @return true iff the callee is being invoked
      */
-    private boolean checkIntentCallEdge(String activityBody, String callee) {
+    private boolean check_intent_callEdge(String activityBody, String callee) {
         String lines[] = activityBody.split("\\r?\\n");
         for (String line : lines) {
             String testString = line.replace("\n", "").replace("\r", "");
@@ -59,12 +49,29 @@ class InferenceVisitor extends AbstractStmtSwitch {
         return false;
     }
 
+    private void modify_edges(SootClass srcClass, String callee) {
+        boolean found = false;
+        for(int i = 0; i < this.edges.size(); i++) {
+            if(this.edges.get(i).get_name().equals(srcClass.getName())) {
+                this.logWriter.write(LogType.OUT, "found edge " + srcClass.getName() + " -> " + callee, true);
+                this.edges.get(i).add_target(callee);
+                found = true;
+            }
+        }
+        if(!found) {
+            this.logWriter.write(LogType.OUT, "made new edge"  + srcClass.getName() + " -> " + callee, true);
+            WTGGraphEdge wtgGraphEdge = new WTGGraphEdge(srcClass);
+            wtgGraphEdge.add_target(callee);
+            this.edges.add(wtgGraphEdge);
+        }
+    }
+
     /**
      * Stores possible Intent callers, prelim to creating an edge
      * @param target the method that has the intent call
      * @param callee the target Activity of the intent call
      */
-    private void storePossibleCallersIntent(SootMethod target, String callee) {
+    private void store_possible_callers_intent(SootMethod target, String callee) {
         CallGraph cg = Scene.v().getCallGraph();
         Iterator sources = new Sources(cg.edgesInto(target));
         while (sources.hasNext()) {
@@ -73,13 +80,8 @@ class InferenceVisitor extends AbstractStmtSwitch {
             // TODO: make this more concrete, pretty hackish
             // TODO: fix made it a _bit_ less hackish but still pretty hackish
             // TODO: issue remains
-            if(checkIntentCallEdge(src.getActiveBody().toString(), callee)) {
-                if (!this.edges.keySet().contains(srcClass.getName())) {
-                    this.edges.put(srcClass.getName(), new ArrayList<>());
-                }
-                if(!this.edges.get(srcClass.getName()).contains(callee)) {
-                    this.edges.get(srcClass.getName()).add(callee);
-                }
+            if(check_intent_callEdge(src.getActiveBody().toString(), callee)) {
+                modify_edges(srcClass, callee);
             }
         }
     }
@@ -88,7 +90,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
      * store unlabeled edges that go from one activity to another
      * @param stmt the invoke stmt
      */
-    private void storeGraphEdges(InvokeStmt stmt) {
+    private void store_graph_edges(InvokeStmt stmt) {
         SootMethod method = stmt.getInvokeExpr().getMethod();
         SootClass methodClass = method.getDeclaringClass();
         // this.logWriter.write(LogType.OUT, "outer if -> " + stmt.getInvokeExpr().getMethod().getName(), true);
@@ -101,7 +103,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
             ValueBox valueBox = stmt.getInvokeExprBox();
             Matcher matcher = Constants.TARGET_ACTIVITY.matcher(valueBox.getValue().toString());
             if(matcher.find()) {
-                storePossibleCallersIntent(method, matcher.group(1));
+                store_possible_callers_intent(method, matcher.group(1));
             }
         }
     }
@@ -113,7 +115,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
     @Override
     public void caseInvokeStmt(InvokeStmt stmt) {
         if(stmt.containsInvokeExpr()) {
-            storeGraphEdges(stmt);
+            store_graph_edges(stmt);
         }
     }
 
@@ -133,7 +135,7 @@ class InferenceVisitor extends AbstractStmtSwitch {
                 String left_value = stmt.getLeftOpBox().getValue().toString();
                 String right_value = stmt.getRightOpBox().getValue().toString();
                 String msg = String.format("Assignment -> %s, %s  %s, %s", left_type, right_type, left_value, right_value);
-                this.logWriter.write(LogType.OUT, msg, true);
+                // this.logWriter.write(LogType.OUT, msg, true);
             }
         }
     }

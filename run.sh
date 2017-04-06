@@ -17,14 +17,16 @@ clean() {
 }
 
 usage() { 
-  printf "Usage: $0 [-v] [-t <ANDROID APK>] [-m <MEMORY>]\n" 1>&2 
+  printf "Usage: $0 [-v] [-t <ANDROID APK>] [-m <MEMORY>] [-c] [-X] [-h]\n" 1>&2 
+  printf "\t-h print this help message and exit\n"
   printf "\t-v shows soot's (very) verbose output\n" 1>&2
   printf "\t-t <ANDROID APK> sets the target apk\n" 1>&2
   printf "\t-m <MEMORY> sets the max java memory (-Xmx)\n" 1>&2
+  printf "\t-X skip running apktool\n" 1>&2
   printf "\t-c clean up dirs\n" 1>&2
   exit 1
 }
-while getopts ":t:vcm:" opt; do
+while getopts ":t:vcm:Xh" opt; do
   case $opt in
     v)
       VERBOSE=1
@@ -39,6 +41,13 @@ while getopts ":t:vcm:" opt; do
       clean
       exit
       ;;
+    X)
+      SKIPAPKTOOL=1
+      ;;
+    h)
+      usage
+      exit
+      ;;
     \?)
       usage
       ;;
@@ -47,18 +56,21 @@ done
 
 clean
 
-if [ $VERBOSE ] ; then
-    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK
+if ! [ $SKIPAPKTOOL ] ; then
+  if [ $VERBOSE ] ; then
+      java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK
+  else
+      printf "Running apktool..."
+      start=`date +%s`
+      java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK &>/dev/null
+      end=`date +%s`
+      APK_TOOL_RUNTIME=$((end-start))
+      printf "Done.\n"
+      printf "apktool runtime...%s seconds\n" $APK_TOOL_RUNTIME
+  fi
 else
-    printf "Running apktool..."
-    start=`date +%s`
-    java "-Xmx$DEFAULT_MEM" -Dfile.encoding=utf-8 -jar $APK_TOOL -o APK_UNPACK d $DEFAULT_APK &>/dev/null
-    end=`date +%s`
-    APK_TOOL_RUNTIME=$((end-start))
-    printf "Done.\n"
-    printf "apktool runtime...%s seconds\n" $APK_TOOL_RUNTIME
+  printf "Apktool...........skipped\n"
 fi
-
 # set memory and pretty print
 if [ $MAX_MEM ] ; then
     DEFAULT_MEM="$MAX_MEM"

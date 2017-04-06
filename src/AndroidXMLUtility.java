@@ -20,14 +20,6 @@ public class AndroidXMLUtility {
     private String apk_path;
     private LogWriter logWriter;
 
-    /**
-     * get the AndroidUIElements from the XML parse
-     * @return the AndroidUIElements
-     */
-    public List<AndroidUIElement> getAndroidUIElements() {
-        return androidUIElements;
-    }
-
     private List<AndroidUIElement> androidUIElements;
     /**
      * Constructor for the AndroidXMLUtility
@@ -146,5 +138,13 @@ public class AndroidXMLUtility {
             }
         }
         return names;
+    }
+
+    /**
+     * get the AndroidUIElements from the XML parse
+     * @return the AndroidUIElements
+     */
+    public List<AndroidUIElement> get_android_UIElements() {
+        return androidUIElements;
     }
 }

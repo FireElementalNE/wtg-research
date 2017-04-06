@@ -14,7 +14,7 @@ public class LogWriter {
      *                to string (for gen_graph.py)
      * @return the msg with a timestamp;
      */
-    private static String formatMsg(LogType lt, String msg, boolean noparse) {
+    private static String format_msg(LogType lt, String msg, boolean noparse) {
         String prefix;
         switch (lt) {
             case ERR:
@@ -51,19 +51,6 @@ public class LogWriter {
         this.logFile.createNewFile();
     }
 
-
-    /**
-     * Constructor for the log writting class, this class creates and writes to logs
-     * @param className the current classname
-     * @param passNum if InferenceVisitor puts the passnum in the name to
-     *                differentiate between passes
-     * @throws IOException
-     */
-    public LogWriter(String className, int passNum) throws IOException {
-        this.logFile = new File(className + Integer.toString(passNum) + Constants.LOG_SUFFIX);
-        this.logFile.createNewFile();
-    }
-
     /**
      * write to a log file
      * @param lt the log type (enum)
@@ -76,7 +63,7 @@ public class LogWriter {
             try {
                 FileWriter fw_out = new FileWriter(this.logFile.getAbsoluteFile(), true);
                 BufferedWriter bw_out = new BufferedWriter(fw_out);
-                bw_out.write(formatMsg(lt, str, noparse));
+                bw_out.write(format_msg(lt, str, noparse));
                 bw_out.flush();
                 if(Constants.DEBUG) {
                     System.out.println("LogWriter: " + str);

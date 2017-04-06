@@ -12,7 +12,7 @@ public class Utilities {
      * @param sootClass the class
      * @return true iff the class is anonymous
      */
-    public static boolean isAnon(SootClass sootClass) {
+    public static boolean is_anon(SootClass sootClass) {
         return sootClass.getName().contains("$");
     }
 
@@ -22,8 +22,8 @@ public class Utilities {
      * @param sootClass the soot class
      * @return the name of the soot class with all '$' removed
      */
-    public static String removeAnon(SootClass sootClass) {
-        if(isAnon(sootClass)) {
+    public static String remove_anon(SootClass sootClass) {
+        if(is_anon(sootClass)) {
             return sootClass.getName().replace("$", "");
         }
         else {
@@ -38,13 +38,13 @@ public class Utilities {
      * @param ancestor the superclass that we are checking
      * @return a boolean that is true iff the current class IS descended from the ancestor
      */
-    static boolean checkAncestry(SootClass sootClass, String ancestor) {
+    static boolean check_ancestry(SootClass sootClass, String ancestor) {
         if(!sootClass.hasSuperclass()) {
             return false;
         }
         else if(sootClass.hasSuperclass()) {
             SootClass methodSuperclass = sootClass.getSuperclass();
-            return methodSuperclass.getName().equals(ancestor) || checkAncestry(methodSuperclass, ancestor);
+            return methodSuperclass.getName().equals(ancestor) || check_ancestry(methodSuperclass, ancestor);
         }
         return false;
     }
@@ -56,10 +56,10 @@ public class Utilities {
      * @param interfaceTarget the target interface
      * @return true iff the class implements the target interface
      */
-    static boolean checkInterfaces(SootClass sootClass, String interfaceTarget) {
+    static boolean check_interfaces(SootClass sootClass, String interfaceTarget) {
         Chain<SootClass> interfaces = sootClass.getInterfaces();
         for(SootClass inter : interfaces) {
-            String className = removeAnon(inter);
+            String className = remove_anon(inter);
             if(className.equals(interfaceTarget)) {
                 return true;
             }

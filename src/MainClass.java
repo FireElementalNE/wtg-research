@@ -94,6 +94,8 @@ public class MainClass {
         // Chain<SootClass> sootClassChain = Scene.v().getClasses();
         infTrans.printAll();
         infTrans.print_ui_elements();
+        WTGGraph graph = new WTGGraph(infTrans.get_nodes(), infTrans.get_edges());
+
     }
 
     private static Local addTmpRef(Body body)

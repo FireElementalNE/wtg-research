@@ -5,16 +5,16 @@ import java.util.*;
 
 
 class InferenceTransformer extends BodyTransformer {
-    private Map <String, List<String>> edges;
-    private List<WTGGraphNode> graph_nodes;
+    private List<WTGGraphEdge> edges;
+    private List<WTGGraphNode> nodes;
     private LogWriter logWriter;
 
     /**
      * Constructor
      */
     InferenceTransformer() {
-        this.edges = new HashMap<>();
-        this.graph_nodes = new ArrayList<>();
+        this.edges = new ArrayList<>();
+        this.nodes = new ArrayList<>();
 
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
@@ -35,7 +35,7 @@ class InferenceTransformer extends BodyTransformer {
     private boolean checkForActivities(SootClass methodClass, SootMethod method) {
         // this finds all of the custom activities (activities that do not start with android.<something>)
         if(methodClass.hasSuperclass() && method.isConstructor()) {
-            if (Utilities.checkAncestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
+            if (Utilities.check_ancestry(methodClass, Constants.ACTIVITY_SUPERCLASS)) {
                 if (!Utilities.androidSkip(methodClass)) {
                     try {
                         // find the onCreate method
@@ -50,7 +50,7 @@ class InferenceTransformer extends BodyTransformer {
                             }
                         }
                         this.logWriter.write(LogType.OUT, wtgGraphNode.toString(), true);
-                        this.graph_nodes.add(wtgGraphNode);
+                        this.nodes.add(wtgGraphNode);
                         return true;
                     } catch (RuntimeException e) {
                         System.err.println("InferenceTransformer: could not find onClick() method");
@@ -75,14 +75,21 @@ class InferenceTransformer extends BodyTransformer {
      * @param visitor the InferenceVisitor that holds the new edges
      */
     private void updateEdges(InferenceVisitor visitor) {
-        if(visitor.edges.keySet().size() > 0) {
-            for(Map.Entry<String, List<String>> entry : visitor.edges.entrySet()) {
-                if(!this.edges.keySet().contains(entry.getKey())) {
-                    this.edges.put(entry.getKey(), entry.getValue());
-                } else {
-                    for(String string : visitor.edges.get(entry.getKey())) {
-                        this.edges.get(entry.getKey()).add(string);
+        List<WTGGraphEdge> tmp_edges = visitor.edges;
+        if(tmp_edges.size() > 0) {
+            for (WTGGraphEdge tmp_edge : tmp_edges) {
+                boolean found = false;
+                for (WTGGraphEdge edge : this.edges) {
+                    if (tmp_edge.get_name().equals(edge.get_name())) {
+                        List<String> targets = tmp_edge.get_targets();
+                        for (String target : targets) {
+                            edge.add_target(target);
+                        }
+                        found = true;
                     }
+                }
+                if (!found) {
+                    this.edges.add(tmp_edge);
                 }
             }
         }
@@ -94,8 +101,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void sendToVisitorFirstPass(Body body) {
         final PatchingChain<Unit> units = body.getUnits();
-        SootClass current_class = body.getMethod().getDeclaringClass();
-        InferenceVisitor visitor = new InferenceVisitor(current_class, this.graph_nodes, 1);
+        InferenceVisitor visitor = new InferenceVisitor();
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
@@ -125,7 +131,7 @@ class InferenceTransformer extends BodyTransformer {
      * prints ui elements (with activity name and counts)
      */
     public void print_ui_elements() {
-        for(WTGGraphNode wtgGraphNode : this.graph_nodes) {
+        for(WTGGraphNode wtgGraphNode : this.nodes) {
             this.logWriter.write(LogType.SCR, wtgGraphNode.get_activity_name(), true);
             HashMap<String, Integer> counts = wtgGraphNode.get_counts();
             for(HashMap.Entry<String, Integer> entry : counts.entrySet()) {
@@ -146,7 +152,7 @@ class InferenceTransformer extends BodyTransformer {
      * Print graph nodes
      */
     private void printNodes() {
-        for (WTGGraphNode entry : this.graph_nodes) {
+        for (WTGGraphNode entry : this.nodes) {
             this.logWriter.write(LogType.OUT, "Activity: " + entry.get_activity_name(), false);
         }
     }
@@ -155,10 +161,31 @@ class InferenceTransformer extends BodyTransformer {
      * Print graph edges
      */
     private void printEdges() {
-        for (Map.Entry<String, List<String>> entry : this.edges.entrySet()) {
-            for (String string : entry.getValue()) {
-                this.logWriter.write(LogType.OUT, entry.getKey() + " --> " + string, false);
+        this.logWriter.write(LogType.OUT, "writing edges " + Integer.toString(this.edges.size()), true);
+        for (WTGGraphEdge edge : this.edges) {
+            List<String> targets = edge.get_targets();
+            this.logWriter.write(LogType.OUT, "Edge target size: " + Integer.toString(targets.size()), true);
+            for(String target : targets) {
+                String out_str = String.format("%s --> %s", edge.get_name(), target);
+                this.logWriter.write(LogType.OUT, out_str, false);
             }
         }
+        this.logWriter.write(LogType.OUT, "done writing edges " + Integer.toString(this.edges.size()), true);
+    }
+
+    /**
+     * gets the graph nodes
+     * @return the graph nodes
+     */
+    public List<WTGGraphNode> get_nodes() {
+        return nodes;
+    }
+
+    /**
+     * get the graph edges
+     * @return the graph edges
+     */
+    public List<WTGGraphEdge> get_edges() {
+        return edges;
     }
 }
