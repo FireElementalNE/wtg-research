@@ -1,7 +1,6 @@
 import soot.*;
 import soot.jimple.Jimple;
 import soot.options.Options;
-import soot.util.Chain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
