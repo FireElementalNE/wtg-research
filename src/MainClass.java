@@ -94,7 +94,8 @@ public class MainClass {
         // Chain<SootClass> sootClassChain = Scene.v().getClasses();
         infTrans.printAll();
         infTrans.print_ui_elements();
-        WTGGraph graph = new WTGGraph(infTrans.get_nodes(), infTrans.get_edges());
+        WTGGraph graph = new WTGGraph(infTrans.get_nodes(), infTrans.get_edges(), Scene.v(), androidXMLUtility);
+        graph.find_ui_element_class();
 
     }
 
