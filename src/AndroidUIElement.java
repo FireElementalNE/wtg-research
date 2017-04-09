@@ -1,3 +1,5 @@
+import soot.SootClass;
+
 /**
  * Created by fire on 3/11/17.
  */
@@ -6,6 +8,7 @@ public class AndroidUIElement {
     private String type;
     private String id;
     private String XML_filename;
+    private SootClass element_class;
 
     /**
      * Constuctor for basic AndroidUIElement
@@ -49,5 +52,13 @@ public class AndroidUIElement {
      */
     public String toString() {
         return this.type + " " + this.id + " " + this.XML_filename;
+    }
+
+    /**
+     * set the element class of the UI element
+     * @param element_class the element class
+     */
+    public void set_element_class(SootClass element_class) {
+        this.element_class = element_class;
     }
 }

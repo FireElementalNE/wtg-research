@@ -79,7 +79,7 @@ printf "Max Memory........%s\n" $DEFAULT_MEM
 
 # set target and pretty print
 if [ $TARGET_APK ] ; then
-    DEFAULT_APK="$TARGET_JAR"
+    DEFAULT_APK="$TARGET_APK"
 fi
 printf "Targeting.........%s\n" $DEFAULT_APK
 

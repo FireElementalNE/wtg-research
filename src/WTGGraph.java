@@ -1,9 +1,8 @@
-import soot.Scene;
-import soot.SootClass;
-import soot.SootField;
+import soot.*;
 import soot.util.Chain;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -44,6 +43,18 @@ public class WTGGraph {
         for(SootClass sootClass : classes) {
             if(sootClass.getName().endsWith(Constants.RID_CLASS_ENDING) &&
                     !Constants.ANDROID_SKIP.matcher(sootClass.getName()).find()) {
+                for(SootMethod sootMethod : sootClass.getMethods()) {
+                    // TODO:Fix this so i can pass to visitor. I need a body to do that
+                    /* MethodSource methodSource = sootMethod.getSource();
+                    Body body = sootMethod.retrieveActiveBody();
+                    final PatchingChain<Unit> units = body.getUnits();
+                    GraphInferenceVisitor visitor = new GraphInferenceVisitor();
+                    for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
+                        final Unit u = iter.next();
+                        u.apply(visitor);
+                    }*/
+                    this.logWriter.write(LogType.OUT, sootMethod.getName(), true);
+                }
                 this.logWriter.write(LogType.OUT, sootClass.getName(), true);
                 Chain<SootField> fields = sootClass.getFields();
                 for(SootField field : fields) {
