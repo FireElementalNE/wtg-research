@@ -34,6 +34,23 @@ public class WTGGraph {
     }
 
     /**
+     * a temporary function to examine the nodes
+     */
+    public void examine_nodes() {
+        for(WTGGraphNode wtgGraphNode : this.nodes) {
+            if(wtgGraphNode.has_active_body()) {
+                this.logWriter.write(LogType.OUT, "node oncreate has an active body (" + wtgGraphNode.get_activity_name() + ")", true);
+            }
+            else {
+                this.logWriter.write(LogType.OUT, "node oncreate has NO active body (" + wtgGraphNode.get_activity_name() + ")", true);
+
+            }
+
+        }
+    }
+
+
+    /**
      * attempts to link the the XML ui elements with the found UI elements
      * this is a first step
      * TODO: continue to expand this, use nodes and edges

@@ -96,6 +96,7 @@ public class MainClass {
         infTrans.print_ui_elements();
         WTGGraph graph = new WTGGraph(infTrans.get_nodes(), infTrans.get_edges(), Scene.v(), androidXMLUtility);
         graph.find_ui_element_class();
+        graph.examine_nodes();
 
     }
 

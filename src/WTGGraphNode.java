@@ -1,3 +1,4 @@
+import soot.Body;
 import soot.SootClass;
 import soot.SootMethod;
 
@@ -10,6 +11,8 @@ public class WTGGraphNode {
     private String activity_name;
     private SootClass activity_class;
     private SootMethod on_create_method;
+    private Body on_create_body;
+    private boolean has_on_create_active_body;
     private HashMap<String, WTGGraphUIElement> ui_elements;
 
     /**
@@ -22,6 +25,13 @@ public class WTGGraphNode {
         this.activity_name = name;
         this.activity_class = soot_class;
         this.on_create_method = on_create_method;
+        if(this.on_create_method.hasActiveBody()) {
+            this.has_on_create_active_body = true;
+            this.on_create_body = this.on_create_method.getActiveBody();
+        }
+        else {
+            this.has_on_create_active_body = false;
+        }
         this.ui_elements = new HashMap<>();
     }
 
@@ -105,6 +115,13 @@ public class WTGGraphNode {
         return ret_val;
     }
 
+    /**
+     * return ths boolean has_on_create_active_body
+     * @return true iff the oncreate method has created an active body
+     */
+    public boolean has_active_body() {
+        return this.has_on_create_active_body;
+    }
 
 
 
