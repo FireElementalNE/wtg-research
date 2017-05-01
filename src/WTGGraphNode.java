@@ -81,7 +81,7 @@ public class WTGGraphNode {
      * get the onCreate() method of the activity
      * @return the onCreate method of the activity
      */
-    public SootMethod getOn_create_method() {
+    public SootMethod get_on_create_method() {
         return on_create_method;
     }
 
@@ -123,7 +123,12 @@ public class WTGGraphNode {
         return this.has_on_create_active_body;
     }
 
-
-
+    /**
+     * get the onCreate method body
+     * @return the onCreate method body
+     */
+    public Body get_on_create_body() {
+        return on_create_body;
+    }
 
 }

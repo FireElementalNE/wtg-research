@@ -40,12 +40,17 @@ public class WTGGraph {
         for(WTGGraphNode wtgGraphNode : this.nodes) {
             if(wtgGraphNode.has_active_body()) {
                 this.logWriter.write(LogType.OUT, "node oncreate has an active body (" + wtgGraphNode.get_activity_name() + ")", true);
+                final PatchingChain<Unit> units = wtgGraphNode.get_on_create_body().getUnits();
+                UIInferenceVisitor visitor = new UIInferenceVisitor();
+                for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
+                    final Unit u = iter.next();
+                    u.apply(visitor);
+                }
             }
             else {
                 this.logWriter.write(LogType.OUT, "node oncreate has NO active body (" + wtgGraphNode.get_activity_name() + ")", true);
 
             }
-
         }
     }
 
