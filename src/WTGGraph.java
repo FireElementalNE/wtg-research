@@ -4,6 +4,7 @@ import soot.util.Chain;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by fire on 4/6/17.
@@ -12,6 +13,7 @@ public class WTGGraph {
     private List<WTGGraphNode> nodes;
     private List<WTGGraphEdge> edges;
     private List <AndroidUIElement> ui_elements;
+    private Map<String, String> implicit_intents;
     private Scene scene;
     private LogWriter logWriter;
 
@@ -22,6 +24,7 @@ public class WTGGraph {
         this.nodes = nodes;
         this.edges = edges;
         this.scene = scene;
+        this.implicit_intents = androidXMLUtility.get_implicit_intents();
         this.ui_elements = androidXMLUtility.get_android_UIElements();
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());

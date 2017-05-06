@@ -22,7 +22,7 @@ usage() {
   printf "\t-v shows soot's (very) verbose output\n" 1>&2
   printf "\t-t <ANDROID APK> sets the target apk\n" 1>&2
   printf "\t-m <MEMORY> sets the max java memory (-Xmx)\n" 1>&2
-  printf "\t-X skip running apktool\n" 1>&2
+  printf "\t-X skip running apktool (currently broken)\n" 1>&2
   printf "\t-c clean up dirs\n" 1>&2
   exit 1
 }
@@ -42,7 +42,8 @@ while getopts ":t:vcm:Xh" opt; do
       exit
       ;;
     X)
-      SKIPAPKTOOL=1
+      # broken
+      # SKIPAPKTOOL=1
       ;;
     h)
       usage
@@ -55,6 +56,12 @@ while getopts ":t:vcm:Xh" opt; do
 done
 
 clean
+
+# set target and pretty print
+if [ $TARGET_APK ] ; then
+    DEFAULT_APK="$TARGET_APK"
+fi
+printf "Targeting.........%s\n" $DEFAULT_APK
 
 if ! [ $SKIPAPKTOOL ] ; then
   if [ $VERBOSE ] ; then
@@ -76,12 +83,6 @@ if [ $MAX_MEM ] ; then
     DEFAULT_MEM="$MAX_MEM"
 fi
 printf "Max Memory........%s\n" $DEFAULT_MEM
-
-# set target and pretty print
-if [ $TARGET_APK ] ; then
-    DEFAULT_APK="$TARGET_APK"
-fi
-printf "Targeting.........%s\n" $DEFAULT_APK
 
 # pretty print compilation and compile
 javac $MAIN_CLASS -classpath "./classpath_includes/soot-trunk.jar:src/"
