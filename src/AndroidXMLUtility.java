@@ -51,7 +51,7 @@ public class AndroidXMLUtility {
                 Node child_attrs = node_child_attrs.item(j);
                 if(child_attrs.getNodeName().equals(Constants.XML_ID_TAG)) {
                     String msg = String.format("%s is %s (%s)", child_attrs.getNodeValue(), ui_type, filename);
-                    this.logWriter.write(LogType.OUT, msg, false);
+                    this.logWriter.write_no_parse(LogType.OUT, msg);
                     this.androidUIElements.add(new AndroidUIElement(child_attrs.getNodeValue(), ui_type, filename));
                 }
             }
@@ -119,7 +119,7 @@ public class AndroidXMLUtility {
 
     /**
      * search the manifest for implicit intent filters
-     * @param manifest the manifest FILE
+     * @param manifest the AndroidManifest FILE object
      */
     private void parse_manifest_for_implicit_intents(File manifest) {
         if(manifest.exists()) {
@@ -142,30 +142,30 @@ public class AndroidXMLUtility {
                                     if (action != null) {
                                         String value = search_attributes(action, "android:name");
                                         if(value != null) {
-                                            this.logWriter.write(LogType.OUT, "Implicit intent string: " + activity_name + " " + value, false);
+                                            this.logWriter.write_no_parse(LogType.OUT, "Implicit intent string: " + activity_name + " " + value);
                                             this.implicit_intents.put(activity_name, value);
                                         }
                                         else {
-                                            this.logWriter.write(LogType.ERR, activity_name + ": action returned null for android:name", false);
+                                            this.logWriter.write_no_parse(LogType.ERR, activity_name + ": action returned null for android:name");
                                         }
                                     } else {
-                                        this.logWriter.write(LogType.ERR, activity_name + ": I got no action from intent-filter.", false);
+                                        this.logWriter.write_no_parse(LogType.ERR, activity_name + ": I got no action from intent-filter.");
                                     }
                                 } else {
-                                    this.logWriter.write(LogType.ERR, activity_name + " gave me null when I searched for intent-filter.", false);
+                                    this.logWriter.write_no_parse(LogType.ERR, activity_name + " gave me null when I searched for intent-filter.");
                                 }
                             }
                             else {
-                                this.logWriter.write(LogType.ERR, "Got null for android:name in activity", false);
+                                this.logWriter.write_no_parse(LogType.ERR, "Got null for android:name in activity");
                             }
                         }
                     }
                     else {
-                        this.logWriter.write(LogType.ERR, "I got no activity objects from application.", false);
+                        this.logWriter.write_no_parse(LogType.ERR, "I got no activity objects from application.");
                     }
                 }
                 else {
-                    this.logWriter.write(LogType.ERR, "I get null when I search for application in manifest.", false);
+                    this.logWriter.write_no_parse(LogType.ERR, "I get null when I search for application in manifest.");
                 }
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 System.err.println("AndroidXMLUtility: parse_manifest_for_implicit_intents " + manifest + " failed.");
@@ -183,16 +183,16 @@ public class AndroidXMLUtility {
     public void parse_xml_file(String filename)  {
         String[] s = this.apk_path.split("/");
         for(String s1 : s) {
-            logWriter.write(LogType.OUT, s1, false);
+            logWriter.write_no_parse(LogType.OUT, s1);
         }
         String true_filename = Constants.APK_UNPACK_PREFIX + filename;
         File in_file = new File(true_filename);
-        if(true_filename.contains("AndroidManifest")) {
+        if(true_filename.contains("AndroidManifest.xml")) {
             parse_manifest_for_implicit_intents(in_file);
         }
         else if(in_file.exists()) {
             try {
-                this.logWriter.write(LogType.OUT, true_filename + " Exists!", false);
+                this.logWriter.write_no_parse(LogType.OUT, true_filename + " Exists!");
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder;
                 builder = factory.newDocumentBuilder();
@@ -213,7 +213,7 @@ public class AndroidXMLUtility {
 
         }
         else {
-            this.logWriter.write(LogType.OUT, true_filename + " does NOT exist!", false);
+            this.logWriter.write_no_parse(LogType.OUT, true_filename + " does NOT exist!");
         }
     }
 
@@ -222,7 +222,7 @@ public class AndroidXMLUtility {
      */
     public void write_elements() {
         for(AndroidUIElement androidUIElement : this.androidUIElements) {
-            this.logWriter.write(LogType.OUT, androidUIElement.toString(), false);
+            this.logWriter.write_no_parse(LogType.OUT, androidUIElement.toString());
         }
     }
 

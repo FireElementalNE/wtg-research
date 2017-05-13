@@ -33,7 +33,7 @@ public class UIInferenceVisitor extends AbstractStmtSwitch {
         Value left = stmt.getLeftOp();
         Value right = stmt.getRightOp();
         String msg = String.format("<%s> = <%s>", left.toString(), right.toString());
-        this.logWriter.write(LogType.OUT, msg, true);
+        this.logWriter.write_parse(LogType.OUT, msg);
     }
 
 }

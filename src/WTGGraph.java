@@ -42,7 +42,7 @@ public class WTGGraph {
     public void examine_nodes() {
         for(WTGGraphNode wtgGraphNode : this.nodes) {
             if(wtgGraphNode.has_active_body()) {
-                this.logWriter.write(LogType.OUT, "node oncreate has an active body (" + wtgGraphNode.get_activity_name() + ")", true);
+                this.logWriter.write_parse(LogType.OUT, "node oncreate has an active body (" + wtgGraphNode.get_activity_name() + ")");
                 final PatchingChain<Unit> units = wtgGraphNode.get_on_create_body().getUnits();
                 UIInferenceVisitor visitor = new UIInferenceVisitor();
                 for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
@@ -51,7 +51,7 @@ public class WTGGraph {
                 }
             }
             else {
-                this.logWriter.write(LogType.OUT, "node oncreate has NO active body (" + wtgGraphNode.get_activity_name() + ")", true);
+                this.logWriter.write_parse(LogType.OUT, "node oncreate has NO active body (" + wtgGraphNode.get_activity_name() + ")");
 
             }
         }
@@ -78,15 +78,15 @@ public class WTGGraph {
                         final Unit u = iter.next();
                         u.apply(visitor);
                     }*/
-                    this.logWriter.write(LogType.OUT, sootMethod.getName(), true);
+                    this.logWriter.write_parse(LogType.OUT, sootMethod.getName());
                 }
-                this.logWriter.write(LogType.OUT, sootClass.getName(), true);
+                this.logWriter.write_parse(LogType.OUT, sootClass.getName());
                 Chain<SootField> fields = sootClass.getFields();
                 for(SootField field : fields) {
                     for(AndroidUIElement ui_element : this.ui_elements) {
                         if(ui_element.getId().contains(field.getName())) {
                             String out_str = String.format("\t%s | %s | %s", field.getName(), ui_element.getId(), ui_element.getXML_filename());
-                            this.logWriter.write(LogType.OUT, out_str, true);
+                            this.logWriter.write_parse(LogType.OUT, out_str);
                         }
                     }
                 }

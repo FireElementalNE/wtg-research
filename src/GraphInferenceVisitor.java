@@ -39,7 +39,7 @@ public class GraphInferenceVisitor  extends AbstractStmtSwitch {
                 String left_value = stmt.getLeftOpBox().getValue().toString();
                 String right_value = stmt.getRightOpBox().getValue().toString();
                 String msg = String.format("Assignment -> %s, %s  %s, %s", left_type, right_type, left_value, right_value);
-                this.logWriter.write(LogType.OUT, msg, true);
+                this.logWriter.write_parse(LogType.OUT, msg);
             }
         }
     }

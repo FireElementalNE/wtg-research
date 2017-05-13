@@ -53,13 +53,13 @@ class InferenceVisitor extends AbstractStmtSwitch {
         boolean found = false;
         for(int i = 0; i < this.edges.size(); i++) {
             if(this.edges.get(i).get_name().equals(srcClass.getName())) {
-                this.logWriter.write(LogType.OUT, "found edge " + srcClass.getName() + " -> " + callee, true);
+                this.logWriter.write_parse(LogType.OUT, "found edge " + srcClass.getName() + " -> " + callee);
                 this.edges.get(i).add_target(callee);
                 found = true;
             }
         }
         if(!found) {
-            this.logWriter.write(LogType.OUT, "made new edge"  + srcClass.getName() + " -> " + callee, true);
+            this.logWriter.write_parse(LogType.OUT, "made new edge"  + srcClass.getName() + " -> " + callee);
             WTGGraphEdge wtgGraphEdge = new WTGGraphEdge(srcClass);
             wtgGraphEdge.add_target(callee);
             this.edges.add(wtgGraphEdge);

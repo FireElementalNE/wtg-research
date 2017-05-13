@@ -49,7 +49,7 @@ class InferenceTransformer extends BodyTransformer {
                                 wtgGraphNode.add_ui_element(local, field_type);
                             }
                         }
-                        this.logWriter.write(LogType.OUT, wtgGraphNode.toString(), true);
+                        this.logWriter.write_parse(LogType.OUT, wtgGraphNode.toString());
                         this.nodes.add(wtgGraphNode);
                         return true;
                     } catch (RuntimeException e) {
@@ -61,7 +61,7 @@ class InferenceTransformer extends BodyTransformer {
                     }
                 } else {
                     String msg = "Skipped: " + methodClass.getName();
-                    this.logWriter.write(LogType.OUT, msg, true);
+                    this.logWriter.write_parse(LogType.OUT, msg);
                     return false;
                 }
             }
@@ -132,10 +132,10 @@ class InferenceTransformer extends BodyTransformer {
      */
     public void print_ui_elements() {
         for(WTGGraphNode wtgGraphNode : this.nodes) {
-            this.logWriter.write(LogType.SCR, wtgGraphNode.get_activity_name(), true);
+            this.logWriter.write_parse(LogType.SCR, wtgGraphNode.get_activity_name());
             HashMap<String, Integer> counts = wtgGraphNode.get_counts();
             for(HashMap.Entry<String, Integer> entry : counts.entrySet()) {
-                this.logWriter.write(LogType.SCR, String.format("\t%s: %d", entry.getKey(), entry.getValue()), true);
+                this.logWriter.write_parse(LogType.SCR, String.format("\t%s: %d", entry.getKey(), entry.getValue()));
             }
         }
     }
@@ -153,7 +153,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void printNodes() {
         for (WTGGraphNode entry : this.nodes) {
-            this.logWriter.write(LogType.OUT, "Activity: " + entry.get_activity_name(), false);
+            this.logWriter.write_no_parse(LogType.OUT, "Activity: " + entry.get_activity_name());
         }
     }
 
@@ -161,16 +161,16 @@ class InferenceTransformer extends BodyTransformer {
      * Print graph edges
      */
     private void printEdges() {
-        this.logWriter.write(LogType.OUT, "writing edges " + Integer.toString(this.edges.size()), true);
+        this.logWriter.write_parse(LogType.OUT, "writing edges " + Integer.toString(this.edges.size()));
         for (WTGGraphEdge edge : this.edges) {
             List<String> targets = edge.get_targets();
-            this.logWriter.write(LogType.OUT, "Edge target size: " + Integer.toString(targets.size()), true);
+            this.logWriter.write_parse(LogType.OUT, "Edge target size: " + Integer.toString(targets.size()));
             for(String target : targets) {
                 String out_str = String.format("%s --> %s", edge.get_name(), target);
-                this.logWriter.write(LogType.OUT, out_str, false);
+                this.logWriter.write_no_parse(LogType.OUT, out_str);
             }
         }
-        this.logWriter.write(LogType.OUT, "done writing edges " + Integer.toString(this.edges.size()), true);
+        this.logWriter.write_parse(LogType.OUT, "done writing edges " + Integer.toString(this.edges.size()));
     }
 
     /**
