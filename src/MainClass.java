@@ -79,7 +79,7 @@ public class MainClass {
             androidXMLUtility.parse_xml_file(s);
         }
         androidXMLUtility.write_elements();
-        InferenceTransformer infTrans = new InferenceTransformer();
+        InferenceTransformer infTrans = new InferenceTransformer(androidXMLUtility.get_implicit_intents());
 
         /**
          * TODO

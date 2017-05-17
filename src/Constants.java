@@ -15,6 +15,7 @@ public class Constants {
     final static String CONTEXT_CLASS = "android.content.Context";
     final static String ON_CLICK_LISTENER_CLASS = "android.view.ViewOnClickListener";
     final static String JAVA_CLASS_CLASS = "java.lang.Class";
+    final static String JAVA_STRING_CLASS = "java.lang.String";
 
     final static String APK_UNPACK_PREFIX = "APK_UNPACK/";
     final static String XML_ID_TAG = "android:id";
@@ -32,9 +33,13 @@ public class Constants {
 
     final static String INTENT_CLASS = "android.content.Intent";
 
+    // <android.content.Intent: void <init>(java.lang.String)>("com.credgen.USERNAME_GEN")
+
     final static Pattern XML_FILENAME = Pattern.compile(("^.*\\.xml$"));
-    final static Pattern TARGET_ACTIVITY = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
-    final static Pattern TARGET_INVOKE_LINE = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
+    final static Pattern TARGET_ACTIVITY_EXPLICIT = Pattern.compile("\\(android\\.content\\.Context,java\\.lang.Class\\)\\>\\(\\$r\\d+, class \\\"([\\w\\W]+)\\\"\\)");
+    final static Pattern TARGET_ACTIVITY_IMPLICIT = Pattern.compile("\\(java\\.lang\\.String\\)>\\(\\\"([\\w\\W]+)\\\"");
+    final static Pattern TARGET_INVOKE_LINE_EXPLICIT = Pattern.compile("<android\\.content\\.Intent: void <init>\\(android\\.content\\.Context,java\\.lang\\.Class\\)>");
+    final static Pattern TARGET_INVOKE_LINE_IMPLICIT = Pattern.compile("<android\\.content\\.Intent: void <init>\\(java\\.lang\\.String\\)>");
     final static Pattern ANDROID_SKIP = Pattern.compile("^android\\..*$");
     final static Pattern WIDGET_CHECK = Pattern.compile("^android\\.widget\\.(.*)$");
 

@@ -143,7 +143,7 @@ public class AndroidXMLUtility {
                                         String value = search_attributes(action, "android:name");
                                         if(value != null) {
                                             this.logWriter.write_no_parse(LogType.OUT, "Implicit intent string: " + activity_name + " " + value);
-                                            this.implicit_intents.put(activity_name, value);
+                                            this.implicit_intents.put(value, activity_name);
                                         }
                                         else {
                                             this.logWriter.write_no_parse(LogType.ERR, activity_name + ": action returned null for android:name");

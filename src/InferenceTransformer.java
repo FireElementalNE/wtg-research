@@ -8,13 +8,15 @@ class InferenceTransformer extends BodyTransformer {
     private List<WTGGraphEdge> edges;
     private List<WTGGraphNode> nodes;
     private LogWriter logWriter;
+    private Map<String, String> implicit_intents;
 
     /**
      * Constructor
      */
-    InferenceTransformer() {
+    InferenceTransformer(Map<String, String> implicit_intents) {
         this.edges = new ArrayList<>();
         this.nodes = new ArrayList<>();
+        this.implicit_intents = implicit_intents;
 
         try {
             this.logWriter = new LogWriter(this.getClass().getSimpleName());
@@ -101,7 +103,7 @@ class InferenceTransformer extends BodyTransformer {
      */
     private void sendToVisitorFirstPass(Body body) {
         final PatchingChain<Unit> units = body.getUnits();
-        InferenceVisitor visitor = new InferenceVisitor();
+        InferenceVisitor visitor = new InferenceVisitor(this.implicit_intents);
         for (Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext(); ) {
             final Unit u = iter.next();
             u.apply(visitor);
